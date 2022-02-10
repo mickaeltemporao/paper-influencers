@@ -1,30 +1,26 @@
 # Twitter API
+source .env
 
 # Get Existing Rules
-curl -v https://api.twitter.com/2/tweets/search/stream/rules -H "Authorization: Bearer $BEARER_TOKEN" | python -m json.tool
+existing='https://api.twitter.com/2/tweets/search/stream/rules'
+curl -v $existing -H "Authorization: Bearer $BEARER_TOKEN" | python -m json.tool
 
 # Update Rules
-curl -X POST 'https://api.twitter.com/2/tweets/search/stream/rules' -H "Content-type: application/json" -H "Authorization: Bearer $BEARER_TOKEN" -d '{ "add": [ {"value": "zemmour OR macron OR pecresse", "tag": "Mention Candidat"} ] }' | python -m json.tool
+update='https://api.twitter.com/2/tweets/search/stream/rules'
+rules='{ "add": [ {"value": "arthaud OR poutou OR melenchon OR melanchon OR hidalgo OR toubira OR jadot OR macron OR pecresse OR pécresse OR #avecvalérie OR #avecvalerie OR asselineau OR zemmour OR zemour OR philippot OR le pen OR #mlafrance OR lassale OR dupont aigan", "tag": "dict 2022-02-10" } ] }'
+curl -X POST $update -H "Content-type: application/json" -H "Authorization: Bearer $BEARER_TOKEN" -d "$rules"| python -m json.tool
 
-# Delete Rules
-curl -X POST 'https://api.twitter.com/2/tweets/search/stream/rules'
-  -H "Content-type: application/json"
-  -H "Authorization: Bearer $BEARER_TOKEN" -d
-  '{
-    "delete": {
-      "ids": [
-        "1491049415108349952"
-      ]
-    }
-  }'
+# Setup Query
+query="https://api.twitter.com/2/tweets/search/stream?
+tweet.fields=created_at,lang&
+expansions=author_id&
+user.fields=username
+"
 
 # Get Tweets
-curl https://api.twitter.com/2/tweets/search/stream -H "Authorization: Bearer $BEARER_TOKEN"
+curl $query -H "Authorization: Bearer $BEARER_TOKEN" >> output.txt
 
-curl "https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at" -H "Authorization: Bearer $BEARER_TOKEN"
-
-# Capture stderr and output displayed on the console and in a file
-command |& tee -a output.txt
-
-curl "https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at" -H "Authorization: Bearer $BEARER_TOKEN" 2>&1 |& tee -a output.txt
-
+# Delete Rules
+delete='https://api.twitter.com/2/tweets/search/stream/rules'
+to_delete='{ "delete": { "ids": [ "1491712714120564736" ] } }'
+curl -X POST $delete -H "Content-type: application/json" -H "Authorization: Bearer $BEARER_TOKEN" -d $to_delete
