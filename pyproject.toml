@@ -7,8 +7,10 @@ license = "CC BY-NC-SA 4.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+tweepy = "^4.5.0"
 
 [tool.poetry.dev-dependencies]
+ipython = "^8.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
