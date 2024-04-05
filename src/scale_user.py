@@ -64,13 +64,14 @@ def scale_description(task, content):
           max_tokens=128,
           top_p=1
         )
+        output = response.choices[0].message.content
+        output = clean_output(output)
+        return output
     except RateLimitError as e:
         time.sleep(59)
         pass
 
-    output = response.choices[0].message.content
-    output = clean_output(output)
-    return output
+
 
 
 def main():
