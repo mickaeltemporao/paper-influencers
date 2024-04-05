@@ -1,8 +1,9 @@
 import ast
 import os
+import time
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 
 
 load_dotenv(find_dotenv())
@@ -46,22 +47,27 @@ def clean_output(text):
 
 
 def scale_description(task, content):
-    response = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {
-          "role": "system",
-          "content": task
-        },
-        {
-          "role": "user",
-          "content": content
-        }
-      ],
-      temperature=0.7,
-      max_tokens=128,
-      top_p=1
-    )
+    try:
+        response = client.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {
+              "role": "system",
+              "content": task
+            },
+            {
+              "role": "user",
+              "content": content
+            }
+          ],
+          temperature=0.7,
+          max_tokens=128,
+          top_p=1
+        )
+    except RateLimitError as e:
+        time.sleep(59)
+        pass
+
     output = response.choices[0].message.content
     output = clean_output(output)
     return output
