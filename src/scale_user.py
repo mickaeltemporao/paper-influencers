@@ -40,6 +40,11 @@ If the account description is "NOT AVAILABLE", provide list with prediected prob
 """
 
 
+def clean_output(text):
+    text = text.replace(',,',',')
+    return text
+
+
 def scale_description(task, content):
     response = client.chat.completions.create(
       model="gpt-3.5-turbo",
@@ -57,7 +62,9 @@ def scale_description(task, content):
       max_tokens=128,
       top_p=1
     )
-    return response.choices[0].message.content
+    output = response.choices[0].message.content
+    output = clean_output(output)
+    return output
 
 
 def main():
