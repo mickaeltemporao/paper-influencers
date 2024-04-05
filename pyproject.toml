@@ -8,6 +8,11 @@ license = "CC BY-NC-SA 4.0"
 [tool.poetry.dependencies]
 python = "^3.10"
 tweepy = "^4.5.0"
+matplotlib = "^3.8.4"
+pyqt6 = "^6.6.1"
+pandas = "^2.2.1"
+openai = "^1.16.2"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.0.1"
