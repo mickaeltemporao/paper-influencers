@@ -15,7 +15,8 @@ client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
-df['description'] = df['description'].fillna("NOT AVAILABLE")
+# df['description'] = df['description'].fillna("NOT AVAILABLE")
+df = df.dropna(subset=['description'])
 
 task_1 = """
 You will receive a Twitter account description written in French. Your objective is to analyze the description and generate a Python list comprising 7 elements, with values between 0 to 1, which indicate the likelyhood of the description aligning with each of the specified political ideologies within the context of the French politics.
@@ -23,7 +24,6 @@ You will receive a Twitter account description written in French. Your objective
 [Extreme left,Left,Center left ,Center,Center right ,Right,Extreme right]
 
 Your output is a python list containing 7 elements that reflect the propabilities of the account description belonging to each of these.
-If the account description is "NOT AVAILABLE", provide list with prediected probabilities of 0.
 """
 
 task_2 = """
@@ -33,6 +33,9 @@ You will receive a Twitter account description written in French. Your objective
 [political party, politician, not applicable]
 [political influencer, non political influencer, not applicable]
 
+"""
+
+"""
 If the account description is "NOT AVAILABLE", provide list with prediected probabilities of 0.
 """
 
@@ -66,7 +69,10 @@ def main():
         try:
             old_csv = pd.read_csv(OUTPUT_FILE_PATH)
         except FileNotFoundError:
-            pass
+            tmp_df.to_csv(OUTPUT_FILE_PATH, index=False)
+            old_csv = pd.read_csv(OUTPUT_FILE_PATH)
+            print("Starting Filed Saved!")
+
         if j['username'] in old_csv['username'].to_list():
             continue
 
@@ -85,16 +91,9 @@ def main():
             tmp_out, orient='index'
         ).transpose()
 
-        tmp_df = pd.concat([tmp_df, tmp_out_df])
-
-        try:
-            old_csv = pd.read_csv(OUTPUT_FILE_PATH)
-            out_csv = pd.concat([old_csv, tmp_df])
-            out_csv.to_csv(OUTPUT_FILE_PATH, index=False)
-            print("Filed Saved")
-        except FileNotFoundError:
-            tmp_df.to_csv(OUTPUT_FILE_PATH, index=False)
-            print("Starting Filed Saved!")
+        tmp_df = pd.concat([old_csv, tmp_out_df])
+        tmp_df.to_csv(OUTPUT_FILE_PATH, index=False)
+        print("Filed Saved")
 
 
 if __name__ == "__main__":
