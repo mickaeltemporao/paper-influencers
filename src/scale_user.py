@@ -10,7 +10,7 @@ load_dotenv(find_dotenv())
 
 
 DATA_FILE_PATH = os.environ.get("USER_DATA_FILE_PATH")
-OUTPUT_FILE_PATH=os.environ.get("OUTPUT_FILE_PATH")
+OUTPUT_FILE_PATH = os.environ.get("OUTPUT_FILE_PATH")
 df = pd.read_csv(DATA_FILE_PATH)
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
@@ -65,9 +65,14 @@ def scale_description(task, content):
           top_p=1
         )
         output = response.choices[0].message.content
-        output = clean_output(output)
+        print(output)
+        if output is not None:
+            output = clean_output(output)
+        else:
+            output = []
         return output
     except RateLimitError as e:
+        print("RateLimit")
         time.sleep(59)
         pass
 
