@@ -14,15 +14,11 @@ load_dotenv(find_dotenv())
 
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
-OUTPUT_FILE_PATH = DATA_PATH + "scaled_output.csv"
-df = pd.read_csv(DATA_PATH+USER_FILE).dropna(subset=['description'])
-client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-)
+OUTPUT_FILE_PATH = DATA_PATH + "gpt_classifier_output.csv"
 
 
 OLD_TASK_IDEOLOGY = """
-You will receive a Twitter account description written in French. Your objective is to analyze the description and generate a Python list comprising 7 elements, with values between 0 to 1, which indicate the likelyhood of the description aligning with each of the specified political ideologies within the context of the French politics.
+You will receive a Twitter account name and description written in French. Your objective is to analyze the description and generate a Python list comprising 7 elements, with values between 0 to 1, which indicate the likelyhood of the description aligning with each of the specified political ideologies within the context of the French politics.
 
 [Extreme left,Left,Center left ,Center,Center right ,Right,Extreme right]
 
@@ -44,7 +40,7 @@ task_1 = """
 You will be provided with a Twitter account description written in French.
 Your task is to classify the description into one of the following political ideologies within the context of French politics: left, center, right, or not applicable.
 
-Your output should consist of the category followed by a semicolon and a brief, one-sentence justification.
+Your output should consist of the category followed by a semicolon and a brief, one-sentence justification in English.
 """
 
 
@@ -96,38 +92,53 @@ def run_task(task, content):
         pass
 
 
+def make_content(obs):
+    return f"""Account name: {j.name}
+Account description: {obs['description']}
+"""
+
+
+task_dict = {
+    # "ideology": task_1,
+    "media": task_2,
+}
+
+
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+)
+
+
 def main():
+    try:
+        tmp_df = pd.read_csv(OUTPUT_FILE_PATH, index_col='username')
+        print("Resuming from previous file.")
+    except FileNotFoundError:
+        df = pd.read_csv(DATA_PATH+USER_FILE)
+        df = df.dropna(subset=['username', 'description']).set_index('username')
+        df['description'].to_csv(OUTPUT_FILE_PATH)
+        tmp_df = df[['description']].copy()
+        print("New output filed created!")
 
-    cols = ['username', 'output']
-    tmp_df = pd.DataFrame(columns=cols)
+    for task in task_dict:
+        newcol = f'task_{task}'
 
-    for i, j in df.iterrows():
-        try:
-            old_csv = pd.read_csv(OUTPUT_FILE_PATH)
-        except FileNotFoundError:
-            tmp_df.to_csv(OUTPUT_FILE_PATH, index=False)
-            old_csv = tmp_df
-            print("Starting Filed Saved!")
+        if newcol not in tmp_df.columns:
+            tmp_df[newcol] = "NONE"
 
-        if j['username'] in old_csv['username'].to_list():
-            continue
+        for i, j in df.iterrows():
+            if tmp_df.loc[j.name, newcol] != "NONE"
+                continue
 
-        print(f"{j['username']} - {i} out of {len(df)}")
+            task_output = run_task(
+                task_dict[task],
+                make_content(j)
+            )
 
-        task_output = run_task(task_2, j['description'])
+            tmp_df.loc[j.name, newcol] = task_output
 
-        tmp_out = {
-            'username': j['username'],
-            'task_1': task_output,
-        }
-        tmp_out_df = pd.DataFrame().from_dict(
-            tmp_out, orient='index'
-        ).transpose()
-
-        tmp_df = pd.concat([old_csv, tmp_out_df])
-        tmp_df.to_csv(OUTPUT_FILE_PATH, index=False)
-        print("Filed Saved")
-
+            tmp_df.to_csv(OUTPUT_FILE_PATH)
+            print("Filed Saved")
 
 if __name__ == "__main__":
     main()
