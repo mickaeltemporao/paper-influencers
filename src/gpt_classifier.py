@@ -64,6 +64,7 @@ task_3 = """
 
 """
 
+
 def run_task(task, content):
     try:
         response = client.chat.completions.create(
@@ -93,7 +94,7 @@ def run_task(task, content):
 
 
 def make_content(obs):
-    return f"""Account name: {j.name}
+    return f"""Account name: {obs.name}
 Account description: {obs['description']}
 """
 
@@ -127,7 +128,7 @@ def main():
             tmp_df[newcol] = "NONE"
 
         for i, j in df.iterrows():
-            if tmp_df.loc[j.name, newcol] != "NONE"
+            if tmp_df.loc[j.name, newcol] != "NONE":
                 continue
 
             task_output = run_task(
@@ -139,6 +140,7 @@ def main():
 
             tmp_df.to_csv(OUTPUT_FILE_PATH)
             print("Filed Saved")
+
 
 if __name__ == "__main__":
     main()
