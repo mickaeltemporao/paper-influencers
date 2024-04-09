@@ -14,7 +14,7 @@ load_dotenv(find_dotenv())
 
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
-OUTPUT_FILE_PATH = DATA_PATH + "gpt_classifier_output.csv"
+OUTPUT_FILE_PATH = DATA_PATH + "tmp/gpt_classifier_output.csv"
 
 
 OLD_TASK_IDEOLOGY = """
@@ -59,8 +59,12 @@ Your output should consist of the category followed by a semicolon and a brief, 
 task_3 = """
 
 - Media, mainstream or alternative
-- party/politician
+- Political, party/politician
 - Influencer, political influence, non political influencer
+
+'influencer'
+ 'political'
+ 'media'
 
 """
 
@@ -100,8 +104,8 @@ Account description: {obs['description']}
 
 
 task_dict = {
-    # "ideology": task_1,
-    "media": task_2,
+    "ideology": task_1,
+    # "media": task_2,
 }
 
 
@@ -127,7 +131,7 @@ def main():
         if newcol not in tmp_df.columns:
             tmp_df[newcol] = "NONE"
 
-        for i, j in df.iterrows():
+        for i, j in tmp_df.iterrows():
             if tmp_df.loc[j.name, newcol] != "NONE":
                 continue
 
