@@ -37,7 +37,7 @@ Your output the python list containing 3 sublists that reflect the propabilities
 
 
 task_1 = """
-You will be provided with a Twitter account description written in French.
+You will be provided with a Twitter account name and its description written in French.
 Your task is to classify the description into one of the following political ideologies within the context of French politics: left, center, right, or not applicable.
 
 Your output should consist of the category followed by a semicolon and a brief, one-sentence justification in English.
@@ -45,7 +45,7 @@ Your output should consist of the category followed by a semicolon and a brief, 
 
 
 task_2 = """
-You will be provided with a Twitter account description written in French.
+You will be provided with a Twitter account name and its description written in French.
 Your task is to classify the description into one of the following categories: 
 
 - media (mainstream media or alternative media)
@@ -56,17 +56,16 @@ Your output should consist of the category followed by a semicolon and a brief, 
 """
 
 
-task_3 = """
-
-- Media, mainstream or alternative
-- Political, party/politician
-- Influencer, political influence, non political influencer
-
-'influencer'
- 'political'
- 'media'
-
-"""
+def make_task_3(media_type):
+    media_dict = {
+        'influencer': 'political influencer or non-political influencer',
+        'media': 'mainstream media or alternative media',
+        'political': 'party or politician',
+    }
+    return f"""You will be provided with a Twitter account name and its description written in French.
+Your task is to classify the description into one of the following two categories: 
+- {media_dict[media_type]}
+Your output consists only of the choosen category."""
 
 
 def run_task(task, content):
@@ -104,8 +103,9 @@ Account description: {obs['description']}
 
 
 task_dict = {
-    "ideology": task_1,
+    # "ideology": task_1,
     # "media": task_2,
+    "type": make_task_3,
 }
 
 
@@ -134,9 +134,10 @@ def main():
         for i, j in tmp_df.iterrows():
             if tmp_df.loc[j.name, newcol] != "NONE":
                 continue
-
+            print(f"Running task for {j.name}")
             task_output = run_task(
-                task_dict[task],
+                # task_dict[task],  # Comment for task 3
+                task_dict[task](j['task_media']),  # Uncomment for Task 3
                 make_content(j)
             )
 
