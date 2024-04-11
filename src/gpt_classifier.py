@@ -58,9 +58,9 @@ Your output should consist of the category followed by a semicolon and a brief, 
 
 def make_task_3(media_type):
     media_dict = {
-        'influencer': 'political influencer or non-political influencer',
-        'media': 'mainstream media or alternative media',
-        'political': 'party or politician',
+        'influencer': 'political influencer OR non-political influencer',
+        'media': 'mainstream media OR alternative media',
+        'political': 'political party OR politician',
     }
     return f"""You will be provided with a Twitter account name and its description written in French.
 Your task is to classify the description into one of the following two categories: 
@@ -105,7 +105,7 @@ Account description: {obs['description']}
 task_dict = {
     # "ideology": task_1,
     # "media": task_2,
-    "type": make_task_3,
+    "media_type": make_task_3,
 }
 
 
@@ -136,8 +136,8 @@ def main():
                 continue
             print(f"Running task for {j.name}")
             task_output = run_task(
-                # task_dict[task],  # Comment for task 3
-                task_dict[task](j['task_media']),  # Uncomment for Task 3
+                task_dict[task],  # Comment for task 3
+                # task_dict[task](j['task_media']),  # Uncomment for Task 3
                 make_content(j)
             )
 
