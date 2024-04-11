@@ -6,16 +6,19 @@ def generate_text(k=3):
     return ''.join(random.choices('abcdefgh', k=k))
 
 
-def generate_date():
+def generate_date(date=None):
     # Generate a random date within the last year
     end_date = pd.to_datetime('today')
     start_date = end_date - pd.Timedelta(days=30)
-    return start_date + pd.Timedelta(
+    new_date = start_date + pd.Timedelta(
         seconds=random.randint(
             0, int((end_date - start_date).total_seconds())
         )
     )
-
+    if date is not None:
+        random_days = random.randint(1, 30)  
+        new_date = pd.to_datetime(date) + pd.Timedelta(random_days)
+    return new_date.strftime("%Y-%m-%d")
 
 def make_data(n=100):
     # Generate a sample dataframe
@@ -24,13 +27,13 @@ def make_data(n=100):
          'tweet': [generate_text() for i in range(n)],
          'tweet-uid': [f't{random.randint(0,100**5)}' for i in range(n)],
          'retweet': [0 for i in range(n)],
-         'timestamp': [generate_date for i in range(n)],
+         'timestamp': [generate_date() for i in range(n)],
          },
     )
     retweets = df.sample(n**2, replace=True)
     retweets['retweet'] = 1
     retweets['timestamp'] = retweets['timestamp'].apply(
-        lambda x: x+random.randint(0, 5)
+        lambda x: generate_date(x)
     )
     retweets['user-uid'] = retweets['user-uid'].apply(
         lambda x: f'u{random.randint(10, 100)}'
@@ -54,6 +57,7 @@ def get_k_factor(user_name):
     return k
 
 
+
 # TODO:
 # Add momentum parameter: Sample top m days % change kfacotrs
 # Add popularity parameter: threshold top p % accounts
@@ -63,19 +67,30 @@ def get_k_factor(user_name):
 # VS
 # optimize N vs inductive
 
-df = make_data(10)
+df = make_data(100)
 df
 df['retweet'].value_counts()
 df['tweet-uid'].value_counts()
 df['user-uid'].value_counts()
 
-x = 'u74'
 
+get_k_factor('u65')
 
 def main():
     pass
 
 
-# Example usage
+def calculate_k_factor(initial_tweets, new_tweets, time_period):
+    k_factor = (new_tweets / initial_tweets) ** (1 / time_period) - 1
+    return k_factor
+
+initial_tweets = int(input("Enter the initial number of customers: "))
+new_tweets = int(input("Enter the number of new customers acquired: "))
+time_period = int(input("Enter the time period (in days): "))
+
+k_factor = calculate_k_factor(initial_tweets, new_tweets, time_period)
+print("The K-factor is: ", k_factor)
+
+
 if __name__ == "__main__":
     main()
