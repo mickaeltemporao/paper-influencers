@@ -17,25 +17,6 @@ USER_FILE = os.environ.get("USER_FILE")
 OUTPUT_FILE_PATH = DATA_PATH + "tmp/gpt_classifier_output.csv"
 
 
-OLD_TASK_IDEOLOGY = """
-You will receive a Twitter account name and description written in French. Your objective is to analyze the description and generate a Python list comprising 7 elements, with values between 0 to 1, which indicate the likelyhood of the description aligning with each of the specified political ideologies within the context of the French politics.
-
-[Extreme left,Left,Center left ,Center,Center right ,Right,Extreme right]
-
-Your output is a python list containing 7 elements that reflect the propabilities of the account description belonging to each of these.
-"""
-
-OLD_TASK_MEDIA = """
-You will receive a Twitter account description written in French. Your objective is to analyze the description and generate 3 Python lists comprising 3 elements each, with values between 0 to 1, which indicate the likelyhood of the description aligning with each of the specified types of political actors within the context of the French politics.
-
-[mainstream media, alternative media, not applicable]
-[political party, politician, not applicable]
-[political influencer, non political influencer, not applicable]
-
-Your output the python list containing 3 sublists that reflect the propabilities of the account description belonging to each of these categories. No other text, or description should be in the output.
-"""
-
-
 task_1 = """
 You will be provided with a Twitter account name and its description written in French.
 Your task is to classify the description into one of the following political ideologies within the context of French politics: left, center, right, or not applicable.
@@ -58,12 +39,12 @@ Your output should consist of the category followed by a semicolon and a brief, 
 
 def make_task_3(media_type):
     media_dict = {
-        'influencer': 'political influencer OR non-political influencer',
-        'media': 'mainstream media OR alternative media',
-        'political': 'political party OR politician',
+        'influencer': '1. political influencer OR 2. non-political influencer',
+        'media': '1. mainstream media OR 2. alternative media',
+        'political': '1. political party OR 2. politician',
     }
     return f"""You will be provided with a Twitter account name and its description written in French.
-Your task is to classify the description into one of the following two categories: 
+Your task is to choose a category best suited for the description based on the following two choices: 
 - {media_dict[media_type]}
 Your output consists only of the choosen category."""
 
