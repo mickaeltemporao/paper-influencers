@@ -38,11 +38,14 @@ def make_data(n=100):
     retweets['user-uid'] = retweets['user-uid'].apply(
         lambda x: f'u{random.randint(10, 100)}'
     )
-    return pd.concat([df, retweets])
+    output = pd.concat([df, retweets])
+    output['timestamp'] = pd.to_datetime(output['timestamp'])
+    return output
 
 
-def get_k_factor(user_name):
+def get_k_factor(user_name, date):
     mask = df['user-uid'] == user_name
+    mask2 = df['timestamp'] < date
     tweets = df[mask]
     user_tw_list = tweets['tweet-uid'].unique()
     # i = number of tweets sent by user
@@ -57,7 +60,6 @@ def get_k_factor(user_name):
     return k
 
 
-
 # TODO:
 # Add momentum parameter: Sample top m days % change kfacotrs
 # Add popularity parameter: threshold top p % accounts
@@ -67,14 +69,18 @@ def get_k_factor(user_name):
 # VS
 # optimize N vs inductive
 
-df = make_data(100)
+df = make_data(10)
 df
 df['retweet'].value_counts()
 df['tweet-uid'].value_counts()
 df['user-uid'].value_counts()
 
+# STREAMING ALTERNATIVE with SIMULATED DATA
 
-get_k_factor('u65')
+user_name = 'u18'
+date = pd.to_datetime('today')
+
+get_k_factor('u82', 'random')
 
 def main():
     pass
