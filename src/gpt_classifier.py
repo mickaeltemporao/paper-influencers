@@ -27,11 +27,11 @@ Your output should consist of the category followed by a semicolon and a brief, 
 
 task_2 = """
 You will be provided with a Twitter account name and its description written in French.
-Your task is to classify the description into one of the following categories: 
+Your task is to classify the description into one of the following categories:
 
-- media (mainstream media or alternative media)
-- party/politician
-- Influencer (political influencer, non political influencer)
+- media
+- political
+- influencer
 
 Your output should consist of the category followed by a semicolon and a brief, one-sentence justification.
 """
@@ -44,7 +44,7 @@ def make_task_3(media_type):
         'political': '1. political party OR 2. politician',
     }
     return f"""You will be provided with a Twitter account name and its description written in French.
-Your task is to choose a category best suited for the description based on the following two choices: 
+Your task is to choose a category best suited for the description based on the following two choices:
 - {media_dict[media_type]}
 Your output consists only of the choosen category."""
 
