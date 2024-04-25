@@ -3,6 +3,7 @@ import os
 import json
 from dotenv import find_dotenv, load_dotenv
 from datetime import datetime
+from tqdm import tqdm
 
 
 # To set your environment variables in your terminal run the following line:
@@ -69,5 +70,5 @@ def main():
 
 if __name__ == "__main__":
     ntweets = 950000
-    for i in range(int(ntweets/500)):
+    for i in tqdm(range(int(ntweets/500))):
         main()
