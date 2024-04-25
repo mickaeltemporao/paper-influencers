@@ -2,6 +2,7 @@ import requests
 import os
 import json
 from dotenv import find_dotenv, load_dotenv
+from datetime import datetime
 
 
 # To set your environment variables in your terminal run the following line:
@@ -15,11 +16,11 @@ search_url = "https://api.twitter.com/2/tweets/search/all"
 
 query_params = {
     'query': '#Presidentielle2022',
-    'tweet.fields': 'created_at,author_id,entities',
-    'start_time': '2022-02-03T00:00:00+01:00',
-    'end_time': '2022-04-24T00:00:00+02:00',
-    'max_results': 25,
-    'expansions': 'author_id',
+    'tweet.fields': 'created_at,author_id,entities,conversation_id',
+    'start_time': '2022-02-01T00:00:00+01:00',
+    'end_time': '2022-04-30T00:00:00+02:00',
+    'max_results': 10,
+    'expansions': 'author_id,referenced_tweets.id',
 }
 
 
@@ -41,11 +42,21 @@ def connect_to_endpoint(url, params):
     return response.json()
 
 
+def update_query(next_id=None):
+    query_params.update(
+        {
+            'next_token':next_id,
+        }
+    )
+
+
 def main():
     json_response = connect_to_endpoint(search_url, query_params)
-    #TODO: FIX FILENAME
-    #TODO: ADD NEXT OPTION for MAX 500
-    with open(f'{data_path}/raw/output.json', 'w') as f:
+    update_query(json_response['meta']['next_token'])
+    new_id = json_response['meta']['newest_id']
+    old_id = json_response['meta']['oldest_id']
+    f'{data_path}raw/new-{new_id}_old-{old_id}.json'
+    with open(f'{data_path}raw/new-{new_id}_old-{old_id}.json', 'w') as f:
         json.dump(json_response, f)
     # print(json.dumps(json_response, indent=4, sort_keys=True))
 
