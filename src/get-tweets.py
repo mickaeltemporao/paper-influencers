@@ -69,5 +69,5 @@ def main():
 
 if __name__ == "__main__":
     ntweets = 950000
-    for i in range(ntweets/500):
+    for i in range(int(ntweets/500)):
         main()
