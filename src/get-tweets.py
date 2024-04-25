@@ -19,7 +19,7 @@ query_params = {
     'tweet.fields': 'created_at,author_id,entities,conversation_id',
     'start_time': '2022-02-01T00:00:00+01:00',
     'end_time': '2022-04-30T00:00:00+02:00',
-    'max_results': 10,
+    'max_results': 500,
     'expansions': 'author_id,referenced_tweets.id',
 }
 
@@ -35,7 +35,12 @@ def bearer_oauth(r):
 
 
 def connect_to_endpoint(url, params):
-    response = requests.request("GET", search_url, auth=bearer_oauth, params=params)
+    response = requests.request(
+        "GET",
+        search_url,
+        auth=bearer_oauth,
+        params=params
+    )
     print(response.status_code)
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
@@ -45,11 +50,12 @@ def connect_to_endpoint(url, params):
 def update_query(next_id=None):
     query_params.update(
         {
-            'next_token':next_id,
+            'next_token': next_id,
         }
     )
 
 
+# TODO: Add data folder check and start from last entry
 def main():
     json_response = connect_to_endpoint(search_url, query_params)
     update_query(json_response['meta']['next_token'])
