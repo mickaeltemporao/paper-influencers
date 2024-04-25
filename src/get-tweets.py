@@ -56,7 +56,15 @@ def update_query(next_id=None):
     )
 
 
-# TODO: Add data folder check and start from last entry
+def get_last_token():
+    files = os.listdir(f'{data_path}raw/')
+    files.sort()
+    file = f"{data_path}raw/{files[0]}"
+    with open(file) as f:
+        d = json.load(f)
+    return d['meta']['next_token']
+
+
 def main():
     json_response = connect_to_endpoint(search_url, query_params)
     update_query(json_response['meta']['next_token'])
@@ -69,6 +77,8 @@ def main():
 
 
 if __name__ == "__main__":
-    ntweets = 950000
+    ntweets = 800000
+    if len(os.listdir(f'{data_path}raw/')) > 0:
+        update_query(get_last_token())
     for i in tqdm(range(int(ntweets/500))):
         main()
