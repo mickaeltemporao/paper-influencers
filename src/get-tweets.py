@@ -78,7 +78,7 @@ def main():
 
 
 if __name__ == "__main__":
-    ntweets = 800000
+    ntweets = 200000
     if len(os.listdir(f'{data_path}raw/')) > 0:
         update_query(get_last_token())
     sleep_time = 15*60
@@ -92,3 +92,4 @@ if __name__ == "__main__":
         if count > 295 and execution_time < sleep_time:  # 900 seconds = 15 minutes
             time.sleep(sleep_time - execution_time + 120)
             count = 1
+            start_time = time.time()
