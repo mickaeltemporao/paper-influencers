@@ -159,7 +159,7 @@ Subcategory ii. non political influencers are individuals that are not directly 
 
 Left wing accounts are those that express political views and opinions or include content that focuses on issues of income equality, environmental protections, social justice, open borders, progressive policies to promote minority representation
 
-Right wing accounts are those that express political views and opinions or include content that focuses on issues of economic liberalism, less state intervention in citizens lives, freedom of speech, lower taxes, controlling borders and immigration
+Right wing accounts are those that express political views and opinions or include content that focuses on issues of economic liberalism, less state intervention in citizens lives, lower taxes, controlling borders and immigration
 
 Centre accounts are those that express political views that mix or combine left and right opinion and content such that one opinion or type of content does not dominate.
 
