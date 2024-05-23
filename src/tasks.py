@@ -3,9 +3,7 @@ def make_task(task_text):
         You are an unbiased French politics expert.
         You will be provided with a Twitter account name and description written in French.
         Your task is to classify the account into one of the following numbered categories:
-
         {task_text}
-
         For each of these categories, I have provided a short description to help you with your choice. 
         Your output consists only of the number of the selected category, that is the number before the description provided.
     """
