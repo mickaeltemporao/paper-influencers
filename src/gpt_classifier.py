@@ -1,6 +1,5 @@
 """
-This module interacts with chatGPT api to label descriptions based on the
-task describted.
+This module interacts with chatGPT API to create labels based on a given task.
 """
 
 import src.tasks
@@ -17,20 +16,14 @@ load_dotenv(find_dotenv())
 
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
-OUTPUT_FILE_PATH = DATA_PATH + "tmp/gpt_classifier_output.csv"
-
-
-task_dict = {
-    "ideology": src.tasks.task_1,
-    "media": src.tasks.task_2,
-    # "media_type": src.make_task_3,
-}
+MODEL = "gpt-4o"
+OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
 
 
 def run_task(task, content):
     try:
         response = client.chat.completions.create(
-          model="gpt-3.5-turbo",
+          model=MODEL,
           messages=[
             {
               "role": "system",
@@ -42,7 +35,7 @@ def run_task(task, content):
             }
           ],
           temperature=0.7,
-          max_tokens=128,
+          max_tokens=5,
           top_p=1
         )
         output = response.choices[0].message.content
@@ -77,7 +70,8 @@ def main():
         tmp_df = df[['description']].copy()
         print("New output filed created!")
 
-    for task in task_dict:
+
+    for task in src.tasks.task_main:
         newcol = f'task_{task}'
 
         if newcol not in tmp_df.columns:
@@ -88,8 +82,7 @@ def main():
                 continue
             print(f"Running task for {j.name}")
             task_output = run_task(
-                task_dict[task],  # Comment for task 3
-                # task_dict[task](j['task_media']),  # Uncomment for Task 3
+                src.tasks.task_main[task],
                 make_content(j)
             )
 

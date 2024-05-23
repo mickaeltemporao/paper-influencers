@@ -9,7 +9,7 @@ def make_task(task_text):
     """
 
 
-task_dict = {
+task_main = {
     "type": make_task(
         """
         1. News media are providers of informational content and analysis on politics, current affairs in France and internationally;
@@ -25,6 +25,9 @@ task_dict = {
         4. Non-partisan accounts are those that typically do not express political views or contain any political content;
         """
     ),
+}
+
+task_sub = {
     "media": make_task(
         """
         1. Mainstream news media are accounts that are established news providers on the TV, newspapers, radio or current affairs magazines, and individual accounts of prominent current and former journalists that have worked for these outlets;
