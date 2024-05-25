@@ -18,6 +18,7 @@ DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 MODEL = "gpt-4o"
 OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
+SUBTASK_LIST = list(src.tasks.task_sub.keys())
 
 
 def run_task(task, content):
@@ -96,21 +97,24 @@ def main():
             print("Filed Saved")
 
 def sub():
-    find_file()
-        newcol = f'task_sub'
-
-        if newcol not in tmp_df.columns:
-            tmp_df[newcol] = "NONE"
+    tmp_df = find_file()
+    newcol = 'task_sub'
+    if newcol not in tmp_df.columns:
+        tmp_df[newcol] = "NONE"
 
     for i, j in tmp_df.iterrows():
         if tmp_df.loc[j.name, newcol] != "NONE":
             continue
         print(f"Running task for {j.name}")
+        current_type = int(j['task_type'] - 1)
         task_output = run_task(
-            task_dict[task],  # Comment for task 3
-            # task_dict[task](j['task_media']),  # Uncomment for Task 3
+            src.tasks.task_sub[SUBTASK_LIST[current_type]],
             make_content(j)
         )
+        tmp_df.loc[j.name, newcol] = task_output
+        tmp_df.to_csv(OUTPUT_FILE_PATH)
+
 
 if __name__ == "__main__":
     main()
+    sub()
