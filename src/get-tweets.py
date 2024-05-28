@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 # To set your environment variables in your terminal run the following line:
 # export 'BEARER_TOKEN'='<your_bearer_token>'
+# Note : The use of next_token or pagination_token in the query depends on which API you are using. Eg "users" uses pagination_token where "tweets" uses "next_token".
 
 load_dotenv(find_dotenv())
 
@@ -68,28 +69,36 @@ def get_last_token():
 
 def main():
     json_response = connect_to_endpoint(search_url, query_params)
-    update_query(json_response['meta']['next_token'])
     new_id = json_response['meta']['newest_id']
     old_id = json_response['meta']['oldest_id']
     f'{data_path}raw/new-{new_id}_old-{old_id}.json'
     with open(f'{data_path}raw/new-{new_id}_old-{old_id}.json', 'w') as f:
         json.dump(json_response, f)
+    if 'next_token' not in json_response['meta'].keys():
+        return print("Tweet collection completed successfully! 🎉")
+    update_query(json_response['meta']['next_token'])
     # print(json.dumps(json_response, indent=4, sort_keys=True))
 
 
 if __name__ == "__main__":
-    ntweets = 200000
-    if len(os.listdir(f'{data_path}raw/')) > 0:
-        update_query(get_last_token())
+    ntweets = 950000
     sleep_time = 15*60
     start_time = time.time()
     count = 1
-    for i in tqdm(range(int(ntweets/500))):
-        main()
-        count += 1
-        end_time = time.time()
-        execution_time = end_time - start_time
-        if count > 295 and execution_time < sleep_time:  # 900 seconds = 15 minutes
-            time.sleep(sleep_time - execution_time + 120)
-            count = 1
-            start_time = time.time()
+
+    if len(os.listdir(f'{data_path}raw/')) > 0:
+        try:
+            update_query(get_last_token())
+            for i in tqdm(range(int(ntweets/500))):
+                main()
+                count += 1
+                end_time = time.time()
+                execution_time = end_time - start_time
+                if count > 295 and execution_time < sleep_time:  # 900 seconds = 15 minutes
+                    time.sleep(sleep_time - execution_time + 120)
+                    count = 1
+                    start_time = time.time()
+        except KeyError as e:
+            print("Tweet collection completed successfully! 🎉")
+            pass
+            
