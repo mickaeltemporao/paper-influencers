@@ -3,7 +3,6 @@ import os
 import json
 import time
 from dotenv import find_dotenv, load_dotenv
-from datetime import datetime
 from tqdm import tqdm
 
 
@@ -17,11 +16,21 @@ bearer_token = os.environ.get("BEARER_TOKEN")
 data_path = os.environ.get("DATA_PATH")
 search_url = "https://api.twitter.com/2/tweets/search/all"
 
+# TODO: create folder in RAW based on query
+# query_params = {
+#     'query': '#Presidentielle2022',
+#     'tweet.fields': 'created_at,author_id,entities,conversation_id',
+#     'start_time': '2022-02-01T00:00:00+01:00',
+#     'end_time': '2022-04-30T00:00:00+02:00',
+#     'max_results': 500,
+#     'expansions': 'author_id,referenced_tweets.id',
+# }
+
 query_params = {
-    'query': '#Presidentielle2022',
+    'query': '#Presidentielle2017',
     'tweet.fields': 'created_at,author_id,entities,conversation_id',
-    'start_time': '2022-02-01T00:00:00+01:00',
-    'end_time': '2022-04-30T00:00:00+02:00',
+    'start_time': '2017-02-15T00:00:00+01:00',
+    'end_time': '2017-05-15T00:00:00+02:00',
     'max_results': 500,
     'expansions': 'author_id,referenced_tweets.id',
 }
