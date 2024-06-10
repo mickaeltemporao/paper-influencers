@@ -17,6 +17,7 @@ DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 MODEL = "gpt-4o"
 OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
+SAMPLE = DATA_PATH + f"raw/twitter_10pct_fg.csv"
 
 type_values = {1: "media", 2: "pol", 3: "other"}
 sub_values_1 = {1: "alt", 2: "msm"}
@@ -25,10 +26,47 @@ sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
 idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "np"}
 types = ['task_type', 'task_sub']
 
+sample_idl_values = { "left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
+
+
+# Prep Human Coded Sample
+df_sample = pd.read_csv(SAMPLE)
+df_sample['fg_type'] = df_sample['fg_type'].str.lower()
+df_sample['fg_idl'] = df_sample['fg_idl'].str.lower()
+df_sample[['fg_type', 'fg_sub']] = df_sample['fg_type'].str.split("/", expand=True)
+df_sample = df_sample[["fg_type", "fg_sub", "fg_idl"]]
+
+# WARNING: THERE ARE MISSING VALUES -> RECODED NON PARTISAN
+mask = df_sample['fg_idl'].isna()
+df_sample.loc[mask, 'fg_idl'] = "non partisan"
+df_sample['fg_idl'] = df_sample['fg_idl'].replace(sample_idl_values)
+
+
+# WARNING: THERE ARE MISSING VALUES OBS bernard_montiel
+mask = df_sample['fg_type'].str.contains("media", na=False)
+df_sample.loc[mask, 'fg_type'] = 1
+mask = df_sample['fg_type'].str.contains("pol", na=False)
+df_sample.loc[mask, 'fg_type'] = 2
+mask = df_sample['fg_type'].str.contains("opooi", na=False)
+df_sample.loc[mask, 'fg_type'] = 3
+
+
+# TODO: Check with FG if former = nat (subcat 3 of pols)
+# 1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
+mask = df_sample['fg_sub'] == 'former'
+df_sample.loc[mask, 'fg_sub'] = 'nat'
+
+# TODO: Check with FG if recode is correct espectially for social and social2
+mask = df_sample['fg_type'] == 3
+sample_sub_values_3 = {"pol": "pol", "social": "socpol", "social2": "soc", "market": "com"}
+df_sample.loc[mask, 'fg_sub'] = df_sample.loc[mask, 'fg_sub'].replace(sample_sub_values_3)
+
+
+
+# Prep GPT Coded Data
 df = pd.read_csv(OUTPUT_FILE_PATH).drop(columns=['description'])
 df = df[['username', 'task_type', 'task_sub', 'task_ideology']]
 df.info()
-
 
 mask = df['task_type'] == 1
 df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_1)
