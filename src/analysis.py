@@ -6,8 +6,8 @@ This module runs a quick analysis to overview the results.
 
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
 from dotenv import find_dotenv, load_dotenv
+from sklearn.metrics import cohen_kappa_score
 
 
 load_dotenv(find_dotenv())
@@ -23,7 +23,7 @@ type_values = {1: "media", 2: "pol", 3: "other"}
 sub_values_1 = {1: "alt", 2: "msm"}
 sub_values_2 = {1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
 sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
-idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "np"}
+idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "4. non partisan"}
 types = ['task_type', 'task_sub']
 
 sample_idl_values = { "left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
@@ -34,7 +34,8 @@ df_sample = pd.read_csv(SAMPLE)
 df_sample['fg_type'] = df_sample['fg_type'].str.lower()
 df_sample['fg_idl'] = df_sample['fg_idl'].str.lower()
 df_sample[['fg_type', 'fg_sub']] = df_sample['fg_type'].str.split("/", expand=True)
-df_sample = df_sample[["fg_type", "fg_sub", "fg_idl"]]
+vars = ["username", "fg_type", "fg_sub", "fg_idl"]
+df_sample = df_sample[vars]
 
 # WARNING: THERE ARE MISSING VALUES -> RECODED NON PARTISAN
 mask = df_sample['fg_idl'].isna()
@@ -49,7 +50,7 @@ mask = df_sample['fg_type'].str.contains("pol", na=False)
 df_sample.loc[mask, 'fg_type'] = 2
 mask = df_sample['fg_type'].str.contains("opooi", na=False)
 df_sample.loc[mask, 'fg_type'] = 3
-
+df_sample['fg_type'] = df_sample['fg_type'].replace(type_values)
 
 # TODO: Check with FG if former = nat (subcat 3 of pols)
 # 1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
@@ -61,11 +62,15 @@ mask = df_sample['fg_type'] == 3
 sample_sub_values_3 = {"pol": "pol", "social": "socpol", "social2": "soc", "market": "com"}
 df_sample.loc[mask, 'fg_sub'] = df_sample.loc[mask, 'fg_sub'].replace(sample_sub_values_3)
 
+df_sample = df_sample.dropna()
+accounts = df_sample['username']
+accounts
 
 
 # Prep GPT Coded Data
 df = pd.read_csv(OUTPUT_FILE_PATH).drop(columns=['description'])
-df = df[['username', 'task_type', 'task_sub', 'task_ideology']]
+vars = ['username', 'task_type', 'task_sub', 'task_ideology']
+df = df[vars]
 df.info()
 
 mask = df['task_type'] == 1
@@ -78,12 +83,36 @@ df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_3)
 df['task_ideology'] = df['task_ideology'].replace(idl_values)
 df['task_type'] = df['task_type'].replace(type_values)
 
-df.head()
-
 df[types].groupby('task_type').value_counts(normalize=True).sort_index()
 df[types].groupby('task_type').value_counts().sort_index()
 df['task_ideology'].value_counts().sort_index()
 df['task_ideology'].value_counts(normalize=True).sort_index()
+
+df = df.set_index('username')
+df_sample = df_sample.set_index('username')
+df_sample = df_sample.join(df)
+
+vars_fg = df_sample.columns[df_sample.columns.str.contains('fg')]
+vars_task = df_sample.columns[df_sample.columns.str.contains('task')]
+
+
+cohen_kappa_score(df_sample['fg_type'], df_sample['task_type'])
+cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
+cohen_kappa_score(df_sample['fg_idl'], df_sample['task_ideology'])
+
+test = df_sample['fg_type'] == df_sample['task_type']
+test.mean()
+test = df_sample['fg_sub'] == df_sample['task_sub']
+test.mean()
+test = df_sample['fg_idl'] == df_sample['task_ideology']
+test.mean()
+
+# Make table
+df['type'] = df['task_type']+ "/" + df['task_sub']
+
+pd.crosstab(df['type'],df['task_ideology'], margins=True)
+pd.crosstab(df['type'],df['task_ideology'], margins=True, normalize=True).round(2)
+pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
 
 """
 type                    n      %
