@@ -38,8 +38,8 @@ task_sub = {
         """
         1. Elected politicians and representatives holding office in France during 2022 at the national, regional or department and local level or a person that ran as an official candidate in the 2022 French parliamentary and Presidential election;
         2. Legally recognized and registered political parties in France, leaders of parties, official spokespersons of parties and political campaigns;
-        3. Political influencer includes former NATIONAL elected politicians, people that have previously held some kind of a governmental office or role;
-        4. Political influencer includes former INTERNATIONAL elected politicians, people that have previously held some kind of a governmental office or role;
+        3. Former National Politician includes former NATIONAL elected politicians, people that have previously held some kind of a governmental office or role;
+        4. International Politician includes former or current INTERNATIONAL elected politicians, people that have previously held some kind of a governmental office or role;
         5. Government agencies, departments, civil servants i.e. non elected/non partisan official state actors;
         """
     ),
