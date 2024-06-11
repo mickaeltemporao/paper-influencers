@@ -114,23 +114,3 @@ pd.crosstab(df['type'],df['task_ideology'], margins=True)
 pd.crosstab(df['type'],df['task_ideology'], margins=True, normalize=True).round(2)
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
 
-"""
-type                    n      %
-media      alt         55   0.65
-           msm         30   0.35
-other      com        115   0.36
-           pol         61   0.19
-           soc        115   0.36
-           socpol      31   0.10
-pol        current     38   0.54
-           gov          6   0.09
-           int          3   0.04
-           nat          5   0.07
-           party       18   0.26
-
-ideology      n     %
-1. left      49  0.10
-2. centre    14  0.03
-3. right     36  0.08
-np          378  0.79
-"""
