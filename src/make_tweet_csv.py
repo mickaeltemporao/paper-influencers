@@ -21,6 +21,7 @@ def main():
 
         mask = df['referenced_tweets'].isna()
         df['referenced_tweets'] = df['referenced_tweets'].ffill()
+        df['referenced_tweets'] = df['referenced_tweets'].bfill()
         df['referenced_tweets'] = df['referenced_tweets'].apply(lambda x: x[0])
         df = pd.concat([df, df['referenced_tweets'].apply(pd.Series)], axis=1)
         df.columns = new_cols
