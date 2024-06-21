@@ -1,7 +1,5 @@
-import csv
 import json
 import os
-import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
@@ -36,10 +34,11 @@ def main():
         all_users.append(users_df)
     pd.concat(all_dfs).to_csv('data/tmp/tweets.csv', index=False)
     pd.concat(all_users)[['id', 'name', 'username']].drop_duplicates().to_csv(
-        'data/tmp/twitter-users.csv', 
-        index=False, 
+        'data/tmp/twitter-users.csv',
+        index=False,
         escapechar='\\'
     )
+
 
 if __name__ == "__main__":
     main()
