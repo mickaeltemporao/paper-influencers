@@ -35,7 +35,7 @@ def main():
         all_dfs.append(df)
         all_users.append(users_df)
     pd.concat(all_dfs).to_csv('data/tmp/tweets.csv', index=False)
-    pd.concat(all_users)[['id', 'name', 'username']].to_csv(
+    pd.concat(all_users)[['id', 'name', 'username']].drop_duplicates().to_csv(
         'data/tmp/twitter-users.csv', 
         index=False, 
         escapechar='\\'
