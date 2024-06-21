@@ -14,11 +14,13 @@ def main():
     keep_cols = ['id', 'created_at', 'author_id', 'type', 'ref_id']
 
     all_dfs = []
+    all_users = []
     for file in tqdm(json_files):
         with open(path_to_json+file) as f:
             d = json.load(f)
-            df = pd.json_normalize(d['data'], max_level=2)
-            df = df[cols]
+        df = pd.json_normalize(d['data'], max_level=2)
+        users_df = pd.json_normalize(d['includes']['users'])
+        df = df[cols]
 
         mask = df['referenced_tweets'].isna()
         df['referenced_tweets'] = df['referenced_tweets'].ffill()
@@ -30,7 +32,9 @@ def main():
         df.loc[mask, 'type'] = 'tweet'
         df.loc[mask, 'ref_id'] = 0
         all_dfs.append(df)
+        all_users.append(users_df)
     pd.concat(all_dfs).to_csv('data/tmp/tweets.csv', index=False)
+    pd.concat(all_users).to_csv('data/tmp/twitter-users.csv', index=False)
 
 
 if __name__ == "__main__":
