@@ -1,6 +1,9 @@
 import pandas as pd
+import multiprocessing
 
 from tqdm import tqdm
+
+cpus = multiprocessing.cpu_count()-1
 
 
 dtypes = {
@@ -53,12 +56,23 @@ day = pd.to_datetime('2022-03-10').date()
 user = 772215918868979712
 get_k_factor(df, user, day)
 
-for day in tqdm(list_of_dates):
+def task(day):
     mask = df['date'] <= day
     list_of_users = df.loc[mask, 'author_id'].unique()
-    # list_of_users = df.loc[mask, 'author_id'].unique()
-    for user in list_of_users:
-        k_factors_list.append({'author_id': user, 'date': day, 'k_factor': get_k_factor(df, user, day)})
+    tmp_output = []
+    for user in tqdm(list_of_users):
+        tmp_output.append({'author_id': user, 'date': day, 'k_factor': get_k_factor(df, user, day)})
+    print(f"Day {day} completed!")
+    return tmp_output
+
+
+# create a process pool that uses all cpus
+with multiprocessing.Pool(cpus) as pool:
+    for result in pool.map(task, list_of_dates[0:2]):
+        k_factors_list.append(result)
+        
+        
+
 
 k_factors_df = pd.DataFrame(k_factors_list)
 k_factors_df
