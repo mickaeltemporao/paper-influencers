@@ -12,6 +12,7 @@ dtypes = {
 }
 
 # df = pd.read_csv("data/tmp/tweets-small-kfactor.csv", dtype=dtypes)
+users = pd.read_csv("data/tmp/twitter-users.csv")
 df = pd.read_csv("data/tmp/tweets.csv", dtype=dtypes)
 df['created_at'] = pd.to_datetime(df['created_at'])
 df['date'] = df['created_at'].dt.date
@@ -25,6 +26,7 @@ df
 # VS
 # optimize N vs inductive
 
+# Switch to CONVERSION RATE
 def get_k_factor(df, author, date):
     # Find tweets from author
     mask1 = df['author_id'] == author
@@ -42,20 +44,23 @@ def get_k_factor(df, author, date):
     else:
         c = 0
     # k-factor
-    return i * c
+    return c
 
 
 list_of_dates = df['date'].unique()
 k_factors_list = []
+day = pd.to_datetime('2022-03-10').date()
+user = 772215918868979712
+get_k_factor(df, user, day)
 
-for day in tqdm(list_of_dates[0:5]):
+for day in tqdm(list_of_dates):
     mask = df['date'] <= day
     list_of_users = df.loc[mask, 'author_id'].unique()
+    # list_of_users = df.loc[mask, 'author_id'].unique()
     for user in list_of_users:
         k_factors_list.append({'author_id': user, 'date': day, 'k_factor': get_k_factor(df, user, day)})
 
 k_factors_df = pd.DataFrame(k_factors_list)
-# Print the k-factors DataFrame
 k_factors_df
 # Save the k-factors DataFrame to a CSV file
 k_factors_df.to_csv('daily_k_factors.csv', index=False)
