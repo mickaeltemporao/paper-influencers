@@ -11,6 +11,7 @@ def main():
     json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
     cols = ['id', 'created_at', 'author_id', 'referenced_tweets']
     new_cols = ['id', 'created_at', 'author_id', 'referenced_tweets', 'type', 'ref_id']
+    keep_cols = ['id', 'created_at', 'author_id', 'type', 'ref_id']
 
     all_dfs = []
     for file in tqdm(json_files):
@@ -25,6 +26,7 @@ def main():
         df['referenced_tweets'] = df['referenced_tweets'].apply(lambda x: x[0])
         df = pd.concat([df, df['referenced_tweets'].apply(pd.Series)], axis=1)
         df.columns = new_cols
+        df = df[keep_cols]
         df.loc[mask, 'type'] = 'tweet'
         df.loc[mask, 'ref_id'] = np.nan
         all_dfs.append(df)
