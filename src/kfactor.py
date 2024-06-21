@@ -1,9 +1,8 @@
 import pandas as pd
 import multiprocessing
+from time import process_time
 
 from tqdm import tqdm
-
-cpus = multiprocessing.cpu_count()-1
 
 
 dtypes = {
@@ -50,32 +49,32 @@ def get_k_factor(df, author, date):
     return c
 
 
-list_of_dates = df['date'].unique()
+list_of_dates = df['date'].unique().sort()
 k_factors_list = []
 day = pd.to_datetime('2022-03-10').date()
 user = 772215918868979712
 get_k_factor(df, user, day)
 
+
 def task(day):
+    print(f"Starting task {day}.")
+    tic = process_time()
     mask = df['date'] <= day
-    list_of_users = df.loc[mask, 'author_id'].unique()
+    list_of_users = df.loc[df['date'] == day, 'author_id'].unique()
     tmp_output = []
-    for user in tqdm(list_of_users):
+    for user in list_of_users:
         tmp_output.append({'author_id': user, 'date': day, 'k_factor': get_k_factor(df, user, day)})
-    print(f"Day {day} completed!")
+    print(f"Day {day} completed in {process_time() - tic}!")
     return tmp_output
 
 
-# create a process pool that uses all cpus
+# create a process pool that uses all cpus -1
+cpus = multiprocessing.cpu_count()-1
 with multiprocessing.Pool(cpus) as pool:
     for result in pool.map(task, list_of_dates[0:2]):
         k_factors_list.append(result)
-        
-        
 
-
-k_factors_df = pd.DataFrame(k_factors_list)
-k_factors_df
 # Save the k-factors DataFrame to a CSV file
+k_factors_df = pd.DataFrame(k_factors_list)
 k_factors_df.to_csv('daily_k_factors.csv', index=False)
 
