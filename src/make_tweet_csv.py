@@ -28,7 +28,7 @@ def main():
         df.loc[mask, 'type'] = 'tweet'
         df.loc[mask, 'ref_id'] = np.nan
         all_dfs.append(df)
-    pd.concat(all_dfs).to_csv('data/tmp/tweets.csv')
+    pd.concat(all_dfs).to_csv('data/tmp/tweets.csv', index=False)
 
 
 if __name__ == "__main__":
