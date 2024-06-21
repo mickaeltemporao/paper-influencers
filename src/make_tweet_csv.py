@@ -12,13 +12,9 @@ def main():
     cols = ['id', 'created_at', 'author_id', 'referenced_tweets']
     new_cols = ['id', 'created_at', 'author_id', 'referenced_tweets', 'type', 'ref_id']
 
-    file_1 = json_files[0]
-    file_2 = json_files[-1]
-
     all_dfs = []
-    all_dfs
     for file in tqdm(json_files):
-        with open(path_to_json+file_2) as f:
+        with open(path_to_json+file) as f:
             d = json.load(f)
             df = pd.json_normalize(d['data'], max_level=2)
             df = df[cols]
@@ -32,6 +28,7 @@ def main():
         df.loc[mask, 'ref_id'] = np.nan
         all_dfs.append(df)
     pd.concat(all_dfs).to_csv('data/tmp/tweets.csv')
+
 
 if __name__ == "__main__":
     main()
