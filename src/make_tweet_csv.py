@@ -28,7 +28,7 @@ def main():
         df.columns = new_cols
         df = df[keep_cols]
         df.loc[mask, 'type'] = 'tweet'
-        df.loc[mask, 'ref_id'] = np.nan
+        df.loc[mask, 'ref_id'] = 0
         all_dfs.append(df)
     pd.concat(all_dfs).to_csv('data/tmp/tweets.csv', index=False)
 
