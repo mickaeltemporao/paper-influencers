@@ -1,4 +1,3 @@
-
 """
 This module runs a quick analysis to overview the results.
 """
@@ -17,7 +16,7 @@ DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 MODEL = "gpt-4o"
 OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
-SAMPLE = DATA_PATH + f"raw/twitter_10pct_fg.csv"
+SAMPLE = DATA_PATH + "raw/twitter_10pct_fg.csv"
 
 type_values = {1: "media", 2: "pol", 3: "other"}
 sub_values_1 = {1: "alt", 2: "msm"}
@@ -26,7 +25,7 @@ sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
 idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "4. non partisan"}
 types = ['task_type', 'task_sub']
 
-sample_idl_values = { "left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
+sample_idl_values = {"left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
 
 
 # Prep Human Coded Sample
@@ -37,13 +36,14 @@ df_sample[['fg_type', 'fg_sub']] = df_sample['fg_type'].str.split("/", expand=Tr
 vars = ["username", "fg_type", "fg_sub", "fg_idl"]
 df_sample = df_sample[vars]
 
-# WARNING: THERE ARE MISSING VALUES -> RECODED NON PARTISAN
+# WARNING: THERE ARE MISSING VALUES -> RECODED NON PARTISAN : OK with FG
 mask = df_sample['fg_idl'].isna()
 df_sample.loc[mask, 'fg_idl'] = "non partisan"
 df_sample['fg_idl'] = df_sample['fg_idl'].replace(sample_idl_values)
 
 
 # WARNING: THERE ARE MISSING VALUES OBS bernard_montiel
+# WE CODED IT TOGETHER WITH FG bernard_montiel,MEDIA/MSM,NON PARTISAN
 mask = df_sample['fg_type'].str.contains("media", na=False)
 df_sample.loc[mask, 'fg_type'] = 1
 mask = df_sample['fg_type'].str.contains("pol", na=False)
@@ -52,14 +52,22 @@ mask = df_sample['fg_type'].str.contains("opooi", na=False)
 df_sample.loc[mask, 'fg_type'] = 3
 df_sample['fg_type'] = df_sample['fg_type'].replace(type_values)
 
-# TODO: Check with FG if former = nat (subcat 3 of pols)
+# """TODO: Check with FG if former = nat (subcat 3 of pols)
 # 1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
+# OK WITH FG
 mask = df_sample['fg_sub'] == 'former'
 df_sample.loc[mask, 'fg_sub'] = 'nat'
 
 # TODO: Check with FG if recode is correct espectially for social and social2
-mask = df_sample['fg_type'] == 3
-sample_sub_values_3 = {"pol": "pol", "social": "socpol", "social2": "soc", "market": "com"}
+# Seems ok!
+mask = df_sample['fg_type'] == "other"
+sample_sub_values_3 = {
+    "pol": "pol",
+    "social": "socpol", 
+    "social2": "soc",
+    "market": "com"
+}
+
 df_sample.loc[mask, 'fg_sub'] = df_sample.loc[mask, 'fg_sub'].replace(sample_sub_values_3)
 
 df_sample = df_sample.dropna()
@@ -91,10 +99,10 @@ df['task_ideology'].value_counts(normalize=True).sort_index()
 df = df.set_index('username')
 df_sample = df_sample.set_index('username')
 df_sample = df_sample.join(df)
+df_sample['type'] = df_sample['fg_type'] + "/" + df_sample['fg_sub']
 
 vars_fg = df_sample.columns[df_sample.columns.str.contains('fg')]
 vars_task = df_sample.columns[df_sample.columns.str.contains('task')]
-
 
 cohen_kappa_score(df_sample['fg_type'], df_sample['task_type'])
 cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
@@ -107,10 +115,47 @@ test.mean()
 test = df_sample['fg_idl'] == df_sample['task_ideology']
 test.mean()
 
+
 # Make table
-df['type'] = df['task_type']+ "/" + df['task_sub']
+df['type'] = df['task_type'] + "/" + df['task_sub']
 
 pd.crosstab(df['type'],df['task_ideology'], margins=True)
 pd.crosstab(df['type'],df['task_ideology'], margins=True, normalize=True).round(2)
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
+
+
+pd.crosstab(df_sample['fg_type'],df_sample['fg_idl'], margins=True)
+pd.crosstab(df_sample['type'],df_sample['fg_idl'], margins=True).round(2)
+
+
+# Analyasis of influencers based on ALGO Method (3)
+df_algo = pd.read_csv("data/tmp/output_gpt-4o_infalgo.csv")
+df_algo
+mask = df_algo['task_type'] == 1
+df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_1)
+mask = df_algo['task_type'] == 2
+df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_2)
+mask = df_algo['task_type'] == 3
+df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_3)
+
+df_algo['task_ideology'] = df_algo['task_ideology'].replace(idl_values)
+df_algo['task_type'] = df_algo['task_type'].replace(type_values)
+df_algo
+
+df_algo[types].groupby('task_type').value_counts().sort_index()
+df_algo[types].groupby('task_type').value_counts(normalize=True).sort_index()
+df_algo['task_ideology'].value_counts().sort_index()
+df_algo['task_ideology'].value_counts(normalize=True).sort_index()
+
+df_algo['type'] = df_algo['task_type'] + "/" + df_algo['task_sub']
+
+pd.crosstab(df_algo['task_type'], df_algo['task_ideology'], margins=True).round(2)
+pd.crosstab(df_sample['task_type'], df_sample['task_ideology'], margins=True).round(2)
+pd.crosstab(df_sample['fg_type'], df_sample['fg_idl'], margins=True)
+pd.crosstab(df_sample['fg_type'], df_sample['fg_idl'], margins=True)
+
+pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
+pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True, normalize=True).round(2)
+pd.crosstab(df_sample['type'], df_sample['fg_idl'], margins=True).round(2)
+
 
