@@ -16,8 +16,10 @@ load_dotenv(find_dotenv())
 
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
+# USER_FILE = 'tmp/inf-algo-ids.csv'
 MODEL = "gpt-4o"
 OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
+# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_infalgo.csv"
 SUBTASK_LIST = list(src.tasks.task_sub.keys())
 
 
