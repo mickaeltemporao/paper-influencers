@@ -95,4 +95,4 @@ with multiprocessing.Pool(cpus) as pool:
         k_factors_list.append(pd.DataFrame(result))
 
 # Save the k-factors DataFrame to a CSV file
-pd.concat(k_factors_list).to_csv('data/tmp/daily_k_factors.csv', index=False)
+pd.concat(k_factors_list).to_csv('data/tmp/daily_conversions_48.csv', index=False)
