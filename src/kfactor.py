@@ -2,8 +2,6 @@ import pandas as pd
 import multiprocessing
 from time import process_time
 
-from tqdm import tqdm
-
 
 dtypes = {
     'id': 'int',
