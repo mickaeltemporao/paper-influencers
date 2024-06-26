@@ -63,7 +63,7 @@ df_sample.loc[mask, 'fg_sub'] = 'nat'
 mask = df_sample['fg_type'] == "other"
 sample_sub_values_3 = {
     "pol": "pol",
-    "social": "socpol", 
+    "social": "socpol",
     "social2": "soc",
     "market": "com"
 }
@@ -72,7 +72,6 @@ df_sample.loc[mask, 'fg_sub'] = df_sample.loc[mask, 'fg_sub'].replace(sample_sub
 
 df_sample = df_sample.dropna()
 accounts = df_sample['username']
-accounts
 
 
 # Prep GPT Coded Data
@@ -105,8 +104,8 @@ vars_fg = df_sample.columns[df_sample.columns.str.contains('fg')]
 vars_task = df_sample.columns[df_sample.columns.str.contains('task')]
 
 cohen_kappa_score(df_sample['fg_type'], df_sample['task_type'])
-cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
 cohen_kappa_score(df_sample['fg_idl'], df_sample['task_ideology'])
+cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
 
 test = df_sample['fg_type'] == df_sample['task_type']
 test.mean()
@@ -124,6 +123,7 @@ pd.crosstab(df['type'],df['task_ideology'], margins=True, normalize=True).round(
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
 
 
+pd.crosstab(df_sample['task_type'],df_sample['task_ideology'], margins=True).round(2)
 pd.crosstab(df_sample['fg_type'],df_sample['fg_idl'], margins=True)
 pd.crosstab(df_sample['type'],df_sample['fg_idl'], margins=True).round(2)
 
@@ -157,5 +157,3 @@ pd.crosstab(df_sample['fg_type'], df_sample['fg_idl'], margins=True)
 pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
 pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True, normalize=True).round(2)
 pd.crosstab(df_sample['type'], df_sample['fg_idl'], margins=True).round(2)
-
-
