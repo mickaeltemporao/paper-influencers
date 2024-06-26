@@ -90,24 +90,22 @@ def main():
 
 
 if __name__ == "__main__":
-    ntweets = 950000
+    ntweets = 100000
     sleep_time = 15*60
     start_time = time.time()
     count = 1
-
     if len(os.listdir(f'{data_path}raw/')) > 0:
         try:
             update_query(get_last_token())
-            for i in tqdm(range(int(ntweets/500))):
-                main()
-                count += 1
-                end_time = time.time()
-                execution_time = end_time - start_time
-                if count > 295 and execution_time < sleep_time:  # 900 seconds = 15 minutes
-                    time.sleep(sleep_time - execution_time + 120)
-                    count = 1
-                    start_time = time.time()
         except KeyError as e:
             print("Tweet collection completed successfully! 🎉")
             pass
-            
+    for i in tqdm(range(int(ntweets/500))):
+        main()
+        count += 1
+        end_time = time.time()
+        execution_time = end_time - start_time
+        if count > 295 and execution_time < sleep_time:  # 900 seconds = 15 minutes
+            time.sleep(sleep_time - execution_time + 120)
+            count = 1
+            start_time = time.time()
