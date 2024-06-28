@@ -24,6 +24,19 @@ sub_values_2 = {1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
 sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
 idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "4. non partisan"}
 types = ['task_type', 'task_sub']
+type_desc = {
+    'media/msm': 'I.1. media/msm',
+    'media/alt': 'I.2. media/alt',
+    'pol/current': 'II.1. pol/current',
+    'pol/party': 'II.2. pol/party',
+    'pol/nat': 'II.3. pol/nat',
+    'pol/int': 'II.4. pol/int',
+    'pol/gov': 'II.5. pol/gov',
+    'other/pol': 'III.1. other/pol',
+    'other/socpol': 'III.2. other/socpol',
+    'other/soc': 'III.3. other/soc',
+    'other/com': 'III.4. other/com',
+}
 
 sample_idl_values = {"left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
 
@@ -90,22 +103,39 @@ df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_3)
 df['task_ideology'] = df['task_ideology'].replace(idl_values)
 df['task_type'] = df['task_type'].replace(type_values)
 
-df[types].groupby('task_type').value_counts(normalize=True).sort_index()
-df[types].groupby('task_type').value_counts().sort_index()
-df['task_ideology'].value_counts().sort_index()
-df['task_ideology'].value_counts(normalize=True).sort_index()
+df['type'] = df['task_type'] + "/" + df['task_sub']
+
 
 df = df.set_index('username')
 df_sample = df_sample.set_index('username')
 df_sample = df_sample.join(df)
-df_sample['type'] = df_sample['fg_type'] + "/" + df_sample['fg_sub']
+df_sample['human_type'] = df_sample['fg_type'] + "/" + df_sample['fg_sub']
+df_sample['ai_type'] = df_sample['task_type'] + "/" + df_sample['task_sub']
+df_sample['ai_type'] = df_sample['ai_type'].replace(type_desc)
+df_sample['human_type'] = df_sample['human_type'].replace(type_desc)
 
 vars_fg = df_sample.columns[df_sample.columns.str.contains('fg')]
 vars_task = df_sample.columns[df_sample.columns.str.contains('task')]
 
+# Make table
+df['type'] = df['task_type'] + "/" + df['task_sub']
+
+# Method 2 Table
+df['type'] = df['type'].replace(type_desc)
+pd.crosstab(df['type'],df['task_ideology'], margins=True)
+
+ai# Method 2 Broad categories
+pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
+
+# Method 2 Broad categories sample
+pd.crosstab(df_sample['ai_type'],df_sample['task_ideology'], margins=True).round(2)
+# Method 2 Broad categories sample
+pd.crosstab(df_sample['human_type'],df_sample['fg_idl'], margins=True)
+
+
 cohen_kappa_score(df_sample['fg_type'], df_sample['task_type'])
-cohen_kappa_score(df_sample['fg_idl'], df_sample['task_ideology'])
 cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
+cohen_kappa_score(df_sample['fg_idl'], df_sample['task_ideology'])
 
 test = df_sample['fg_type'] == df_sample['task_type']
 test.mean()
@@ -115,20 +145,7 @@ test = df_sample['fg_idl'] == df_sample['task_ideology']
 test.mean()
 
 
-# Make table
-df['type'] = df['task_type'] + "/" + df['task_sub']
-
-pd.crosstab(df['type'],df['task_ideology'], margins=True)
-pd.crosstab(df['type'],df['task_ideology'], margins=True, normalize=True).round(2)
-pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
-
-
-pd.crosstab(df_sample['task_type'],df_sample['task_ideology'], margins=True).round(2)
-pd.crosstab(df_sample['fg_type'],df_sample['fg_idl'], margins=True)
-pd.crosstab(df_sample['type'],df_sample['fg_idl'], margins=True).round(2)
-
-
-# Analyasis of influencers based on ALGO Method (3)
+# Method 3: Analyasis of influencers based on ALGO Method (3)
 df_algo = pd.read_csv("data/tmp/output_gpt-4o_infalgo.csv")
 df_algo
 mask = df_algo['task_type'] == 1
@@ -148,12 +165,7 @@ df_algo['task_ideology'].value_counts().sort_index()
 df_algo['task_ideology'].value_counts(normalize=True).sort_index()
 
 df_algo['type'] = df_algo['task_type'] + "/" + df_algo['task_sub']
-
-pd.crosstab(df_algo['task_type'], df_algo['task_ideology'], margins=True).round(2)
-pd.crosstab(df_sample['task_type'], df_sample['task_ideology'], margins=True).round(2)
-pd.crosstab(df_sample['fg_type'], df_sample['fg_idl'], margins=True)
-pd.crosstab(df_sample['fg_type'], df_sample['fg_idl'], margins=True)
+df_algo['type'] = df_algo['type'].replace(type_desc)
 
 pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
-pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True, normalize=True).round(2)
-pd.crosstab(df_sample['type'], df_sample['fg_idl'], margins=True).round(2)
+
