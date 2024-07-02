@@ -124,7 +124,7 @@ df['type'] = df['task_type'] + "/" + df['task_sub']
 df['type'] = df['type'].replace(type_desc)
 pd.crosstab(df['type'],df['task_ideology'], margins=True)
 
-ai# Method 2 Broad categories
+# Method 2 Broad categories
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
 
 # Method 2 Broad categories sample
