@@ -7,7 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 
-df = pd.read_csv("data/tmp/daily_conversions_48.csv")
+df = pd.read_csv("data/tmp/q95_daily_conversions_48.csv")
 mask = df.groupby('author_id')['k_factor'].mean() > 1
 ids = mask[mask].reset_index()['author_id'].values
 
@@ -48,7 +48,7 @@ def main():
     json_response = connect_to_endpoint(search_url, query_params)
     df = pd.json_normalize(json_response['data'])
     df['author_id'] = ids
-    df.to_csv('data/tmp/inf-algo-ids.csv', index=False)
+    df.to_csv('data/tmp/q95-inf-algo-ids.csv', index=False)
 
 
 if __name__ == "__main__":

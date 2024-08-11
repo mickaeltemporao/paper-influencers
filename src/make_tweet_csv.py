@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 def main():
-    path_to_json = 'data/tweets-Presidentielle2022/'
+    path_to_json = 'data/raw/tweets-Presidentielle2022/'
     json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
     cols = ['id', 'created_at', 'author_id', 'referenced_tweets']
     new_cols = ['id', 'created_at', 'author_id', 'referenced_tweets', 'type', 'ref_id']

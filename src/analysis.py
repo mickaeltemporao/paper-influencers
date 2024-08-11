@@ -4,10 +4,12 @@ This module runs a quick analysis to overview the results.
 
 
 import os
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+
 from dotenv import find_dotenv, load_dotenv
 from sklearn.metrics import cohen_kappa_score
-
 
 load_dotenv(find_dotenv())
 
@@ -18,11 +20,11 @@ MODEL = "gpt-4o"
 OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
 SAMPLE = DATA_PATH + "raw/twitter_10pct_fg.csv"
 
-type_values = {1: "media", 2: "pol", 3: "other"}
+type_values = {1: "I. Media", 2: "II. Pol", 3: "III. Other"}
 sub_values_1 = {1: "alt", 2: "msm"}
 sub_values_2 = {1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
 sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
-idl_values = {1: "1. left", 2: "2. centre", 3: "3. right", 4: "4. non partisan"}
+idl_values = {1: "1. Left", 2: "2. Centre", 3: "3. Right", 4: "4. Non-Par."}
 types = ['task_type', 'task_sub']
 type_desc = {
     'media/msm': 'I.1. media/msm',
@@ -106,7 +108,9 @@ df['task_type'] = df['task_type'].replace(type_values)
 df['type'] = df['task_type'] + "/" + df['task_sub']
 
 
+df['username'] = df['username'].str.lower()
 df = df.set_index('username')
+df_sample['username'] = df_sample['username'].str.lower()
 df_sample = df_sample.set_index('username')
 df_sample = df_sample.join(df)
 df_sample['human_type'] = df_sample['fg_type'] + "/" + df_sample['fg_sub']
@@ -126,6 +130,7 @@ pd.crosstab(df['type'],df['task_ideology'], margins=True)
 
 # Method 2 Broad categories
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
+
 
 # Method 2 Broad categories sample
 pd.crosstab(df_sample['ai_type'],df_sample['task_ideology'], margins=True).round(2)
@@ -168,4 +173,88 @@ df_algo['type'] = df_algo['task_type'] + "/" + df_algo['task_sub']
 df_algo['type'] = df_algo['type'].replace(type_desc)
 
 pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
+
+# Get proportion of accounts in list of 66 & 477
+usr66 = pd.read_table('data/raw/acc_tw_66.txt')['username'].str.lower()
+pd.Series(df_algo['username'].str.lower().unique()).isin(usr66).sum()
+pd.Series(df_algo['username'].str.lower().unique()).isin(df.index.str.lower()).sum()
+
+# Prepare Figures
+
+# Creating the dataframe
+df_66 = pd.DataFrame({
+    'task_ideology': ['1. Left', '2. Centre', '3. Right', '4. Non-Par.'],
+    'I. Media': [7, 0, 3, 4],
+    'II. Pol': [9, 13, 13, 0],
+    'III. Other': [13, 3, 28, 8],
+})
+df_66 = pd.DataFrame(df_66).set_index('task_ideology').T
+df_66
+
+vars = ['type', 'sub', 'idl', 'mix']
+df.columns = vars
+df['method'] = 'M1'
+
+df_fg = df_sample[df_sample.columns[df_sample.columns.str.contains('fg|human')]]
+df_fg
+df_fg.columns = vars
+df_fg['method'] = 'M2 Sample HM'
+
+df_ai = df_sample[df_sample.columns[~df_sample.columns.str.contains('fg|human')]]
+df_ai = df_ai.drop(columns = ['ai_type'])
+df_ai
+df_ai.columns = vars
+df_ai
+df_ai['method'] = 'M2 Sample IA'
+
+df_algo['username'] = df_algo['username'].str.lower()
+df_algo = df_algo.set_index('username')
+df_algo.columns =  ['description', 'type', 'idl', 'sub', 'mix']
+df_algo = df_algo[vars]
+df_algo['method'] = 'M3'
+df_algo
+
+pd.crosstab(df_algo['type'], df_algo['idl'])
+
+def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
+# Plotting the heatmap
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(df, annot=True, cmap='Blues', linewidths=3, annot_kws={"size": 40}, cbar=False, square=True, fmt=".0f")
+    plt.title(title, fontsize=26)
+    plt.xlabel('Ideology', fontsize=24)
+    plt.ylabel('Type', fontsize=24)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
+
+make_fig(df_66, title='Method 1 | Expert Evaluation \nn=101', output='fig_m1.png')
+plot = pd.crosstab(df['type'], df['idl'])
+make_fig(plot, title='Method 2 | Hybrid Evaluation \nn=477', output='fig_m2.png')
+plot = pd.crosstab(df_fg['type'], df_fg['idl'])
+make_fig(plot, title='M2 Human Sample \nn=48', output='fig_m2hm.png')
+plot = pd.crosstab(df_ai['type'], df_ai['idl'])
+plot['3. Right'] = [0, 0, 0]
+plot = plot[["1. Left", "2. Centre", "3. Right", "4. Non-Par."]]
+make_fig(plot, title='M2 AI Sample \nn=48', output='fig_m2ai.png')
+plot = pd.crosstab(df_algo['type'], df_algo['idl'])
+make_fig(plot, title='Method 3 | Algorithmic Evaluation \nn=40', output='fig_m3.png')
+
+
+def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
+# Plotting the heatmap
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(df, annot=True, cmap='Blues', linewidths=3, annot_kws={"size": 40}, cbar=False, fmt=".2f")
+    plt.title(title, fontsize=26)
+    plt.xlabel('Ideology', fontsize=24)
+    plt.ylabel('Type', fontsize=24)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
+
+plot = df_66/101
+make_fig(plot.round(2), title='Method 1 | Expert Evaluation \nn=101', output='fig_m1_prop.png')
+plot = pd.crosstab(df['type'], df['idl'])/477
+make_fig(plot.round(2), title='Method 2 | Hybrid Evaluation \nn=477', output='fig_m2_prop.png')
+plot = pd.crosstab(df_algo['type'], df_algo['idl'])/40
+make_fig(plot.round(2), title='Method 3 | Algorithmic Evaluation \nn=40', output='fig_m3_prop.png')
 
