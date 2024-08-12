@@ -24,7 +24,7 @@ df['created_at'] = pd.to_datetime(df['created_at'], utc=True)
 df = df[df['created_at'] <= election_date]
 df['date'] = df['created_at'].dt.date
 
-# Find Top 1% active accounts in the last 4 weeks 
+# Find Top 5% active accounts in the last 4 weeks 
 group = ['date', 'author_id']
 two_weeks = pd.to_datetime("2022-04-24") - pd.Timedelta('4w')
 top_df = df.groupby(group).size().reset_index(name='msg_count')
@@ -70,7 +70,7 @@ def get_conversion_rate(df, author, date, hours=HOURS):
 
 list_of_dates = df['date'].unique()
 list_of_dates.sort()
-k_factors_list = []
+conv_rate_list = []
 day = pd.to_datetime('2022-02-01').date()
 user = 772215918868979712
 get_conversion_rate(df, user, day)
@@ -84,7 +84,7 @@ def task(day):
     list_of_users = df.loc[(mask1 & mask2), 'author_id'].unique()
     tmp_output = []
     for user in list_of_users:
-        tmp_output.append({'author_id': user, 'date': day, 'k_factor': get_conversion_rate(df, user, day)})
+        tmp_output.append({'author_id': user, 'date': day, 'conv_rate': get_conversion_rate(df, user, day)})
     print(f"Day {day} completed in {process_time() - tic}!")
     return tmp_output
 
@@ -93,7 +93,7 @@ def task(day):
 cpus = multiprocessing.cpu_count()-1
 with multiprocessing.Pool(cpus) as pool:
     for result in pool.map(task, list_of_dates):
-        k_factors_list.append(pd.DataFrame(result))
+        conv_rate_list.append(pd.DataFrame(result))
 
 # Save the k-factors DataFrame to a CSV file
-pd.concat(k_factors_list).to_csv(f'data/tmp/q{QUANTILE}_daily_conversions_{HOURS}.csv', index=False)
+pd.concat(conv_rate_list).to_csv(f'data/tmp/q{QUANTILE}_daily_conversions_{HOURS}.csv', index=False)
