@@ -25,6 +25,46 @@ task_main = {
         4. Non-partisan accounts are those that typically do not express political views or contain any political content;
         """
     ),
+    "age": make_task(
+        """
+        1. 18-24 Early adulthood, references to college, social media trends, youth culture.
+        2. 25-34: Early career stage, potential references to career growth, early family life, pop culture.
+        3. 35-44: Mid-career, family-oriented topics, more established professional references.
+        4. 45-54: Experienced career stage, references to leadership roles, mature pop culture.
+        5. 55-64: Pre-retirement stage, discussions about retirement, long-term career, older family dynamics.
+        6. 65+: Retirement, senior living, nostalgia, grandparenting.
+        0. Unclassifiable/Insufficient Information.
+        """
+    ),
+    "gender": make_task(
+        """
+        1. Male: Masculine language, traditional male-dominated interests or references.
+        2. Female: Feminine language, topics or references more common among women.
+        3. Non-binary/Genderqueer: Non-gendered language, a mix of traditionally male and female references.
+        0. Unclassifiable/Insufficient Information.
+        """
+    ),
+    "education": make_task(
+        """
+        1. High School or Lower: Basic language use, common knowledge, fewer technical terms.
+        2. Some College/Technical School: Intermediate language, some industry-specific terms or references.
+        3. Undergraduate Degree: Advanced language, references to undergraduate-level education.
+        4. Graduate Degree (Master’s, PhD): Complex language, use of specialized terminology, advanced concepts.
+        5. Professional Certifications: Industry-specific jargon, focus on certification-related content.
+        0. Unclassifiable/Insufficient Information.
+        """
+    ),
+    "background": make_task(
+        """
+        1. Technology/IT: Technical jargon, references to software, coding, tech industry trends.
+        2. Healthcare: Medical terminology, patient care references, healthcare industry trends.
+        3. Education/Academia: Pedagogical language, references to teaching, research, academic topics.
+        4. Business/Finance: Financial jargon, business strategy references, corporate culture.
+        5. Creative Arts/Media: Artistic language, references to media, design, entertainment.
+        6. Other/General: Non-specific or a mix of professional language from various industries.
+        0. Unclassifiable/Insufficient Information.
+        """
+    )
 }
 
 task_sub = {
