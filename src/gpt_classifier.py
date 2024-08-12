@@ -13,13 +13,16 @@ from openai import OpenAI, RateLimitError
 
 load_dotenv(find_dotenv())
 
-
+# TODO: uniform file names, output-m[1-4]..., ids-m[1-4].csv etc
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 # USER_FILE = 'tmp/inf-algo-ids.csv'
-MODEL = "gpt-4o"
-OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
+USER_FILE = 'tmp/m4-ids.csv'
+# MODEL = "gpt-4o"
+MODEL = "gpt-4o-mini-2024-07-18"
+# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
 # OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_infalgo.csv"
+OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_networkalgo_m4.csv"
 SUBTASK_LIST = list(src.tasks.task_sub.keys())
 
 

@@ -18,7 +18,6 @@ output = pd.DataFrame(
 )
 
 output['centrality'] = output['centrality']/(output.shape[0]-1)
-mask = output['centrality'] > output['centrality'].quantile(0.990)
+mask = output['centrality'] > output['centrality'].quantile(0.99)
 output[mask].sort_values(by='centrality', ascending=False).to_csv("data/tmp/indegree99.csv", index=False)
-
 

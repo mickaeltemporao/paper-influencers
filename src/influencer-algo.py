@@ -1,3 +1,6 @@
+"""
+This module outputs a csv containing the username and descriptions for M3.
+"""
 import os
 import pandas as pd
 import requests
@@ -8,8 +11,17 @@ load_dotenv(find_dotenv())
 
 
 df = pd.read_csv("data/tmp/q95_daily_conversions_48.csv")
+
+timeframe = pd.to_datetime("2022-04-24") - pd.Timedelta('4w')
+mask = pd.to_datetime(df['date']) > timeframe
+df = df[mask]
+
 mask = df.groupby('author_id')['k_factor'].mean() > 1
 ids = mask[mask].reset_index()['author_id'].values
+
+users = pd.read_csv("data/tmp/twitter-users.csv")
+users = users[~users['id'].duplicated()].set_index('id').loc[ids]
+
 
 bearer_token = os.environ.get("BEARER_TOKEN")
 data_path = os.environ.get("DATA_PATH")
