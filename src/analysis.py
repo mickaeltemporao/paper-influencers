@@ -20,6 +20,7 @@ USER_FILE = os.environ.get("USER_FILE")
 SAMPLE = DATA_PATH + "raw/twitter_10pct_fg.csv"
 DATA_M2 = DATA_PATH + "tmp/output_gpt-4o.csv"
 DATA_M3 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_infalgo.csv"
+DATA_M4 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_networkalgo.csv"
 
 type_values = {1: "I. Media", 2: "II. Pol", 3: "III. Other"}
 sub_values_1 = {1: "alt", 2: "msm"}
@@ -173,10 +174,30 @@ df_algo['type'] = df_algo['type'].replace(type_desc)
 
 pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
 
+# Method 4 - Network
+DATA_M4 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_networkalgo_m4.csv"
+df4 = pd.read_csv(DATA_M4).drop(columns=['description'])
+mask = df4['task_type'] == 1
+df4.loc[mask, 'task_sub'] = df4.loc[mask, 'task_sub'].replace(sub_values_1)
+mask = df4['task_type'] == 2
+df4.loc[mask, 'task_sub'] = df4.loc[mask, 'task_sub'].replace(sub_values_2)
+mask = df4['task_type'] == 3
+df4.loc[mask, 'task_sub'] = df4.loc[mask, 'task_sub'].replace(sub_values_3)
+
+df4['task_ideology'] = df4['task_ideology'].replace(idl_values)
+df4['task_type'] = df4['task_type'].replace(type_values)
+df4['type'] = df4['task_type'] + "/" + df4['task_sub']
+df4['type'] = df4['type'].replace(type_desc)
+
+pd.crosstab(df4['type'], df4['task_ideology'], margins=True)
+
+df4.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
+
 # Get proportion of accounts in list of 66 & 477
 usr66 = pd.read_table('data/raw/acc_tw_66.txt')['username'].str.lower()
 pd.Series(df_algo['username'].str.lower().unique()).isin(usr66).sum()
 pd.Series(df_algo['username'].str.lower().unique()).isin(df.index.str.lower()).sum()
+
 
 # Prepare Figures
 
@@ -243,6 +264,11 @@ make_fig(plot, title=f'M2 AI Sample \nn={nsample}', output='figures/fig_m2ai.png
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
 n3 = plot.sum().sum()
 make_fig(plot, title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3.png')
+plot = pd.crosstab(df4['type'], df4['idl'])
+n4 = plot.sum().sum()
+make_fig(plot, title=f'Method 4 | Centrality - Indegree \nn={n4}', output='figures/fig_m4.png')
+
+
 
 
 def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
@@ -264,4 +290,7 @@ make_fig(plot.round(2), title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
 plot = plot/n3
 make_fig(plot.round(2), title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3_prop.png')
+plot = pd.crosstab(df4['type'], df4['idl'])
+plot = plot/n4
+make_fig(plot.round(2), title=f'Method 4 | Centrality - Indegree \nn={n4}', output='figures/fig_m4_prop.png')
 
