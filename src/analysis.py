@@ -14,6 +14,7 @@ from sklearn.metrics import cohen_kappa_score
 load_dotenv(find_dotenv())
 
 
+# TODO: Check account descriptions used are the ones from election camapaign!
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 SAMPLE = DATA_PATH + "raw/twitter_10pct_fg.csv"
@@ -226,17 +227,22 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.yticks(fontsize=18)
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-make_fig(df_66, title='Method 1 | Expert Evaluation \nn=101', output='figures/fig_m1.png')
+
+n1 = df_66.sum().sum()
+make_fig(df_66, title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1.png')
 plot = pd.crosstab(df['type'], df['idl'])
-make_fig(plot, title='Method 2 | Hybrid Evaluation \nn=477', output='figures/fig_m2.png')
+n2 = plot.sum().sum()
+make_fig(plot, title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2.png')
 plot = pd.crosstab(df_fg['type'], df_fg['idl'])
-make_fig(plot, title='M2 Human Sample \nn=48', output='figures/fig_m2hm.png')
+nsample = plot.sum().sum()
+make_fig(plot, title=f'M2 Human Sample \nn={nsample}', output='figures/fig_m2hm.png')
 plot = pd.crosstab(df_ai['type'], df_ai['idl'])
 plot['3. Right'] = [0, 0, 0]
 plot = plot[["1. Left", "2. Centre", "3. Right", "4. Non-Par."]]
-make_fig(plot, title='M2 AI Sample \nn=48', output='figures/fig_m2ai.png')
+make_fig(plot, title=f'M2 AI Sample \nn={nsample}', output='figures/fig_m2ai.png')
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
-make_fig(plot, title='Method 3 | Algorithmic Evaluation \nn=40', output='figures/fig_m3.png')
+n3 = plot.sum().sum()
+make_fig(plot, title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3.png')
 
 
 def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
@@ -250,15 +256,12 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.yticks(fontsize=18)
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-n1 = df_66.sum().sum()
 plot = df_66/n1
 make_fig(plot.round(2), title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1_prop.png')
 plot = pd.crosstab(df['type'], df['idl'])
-n2 = plot.sum().sum()
 plot = plot/n2
 make_fig(plot.round(2), title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2_prop.png')
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
-n3 = plot.sum().sum()
 plot = plot/n3
 make_fig(plot.round(2), title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3_prop.png')
 
