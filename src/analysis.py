@@ -16,9 +16,9 @@ load_dotenv(find_dotenv())
 
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
-MODEL = "gpt-4o"
-OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
 SAMPLE = DATA_PATH + "raw/twitter_10pct_fg.csv"
+DATA_M2 = DATA_PATH + "tmp/output_gpt-4o.csv"
+DATA_M3 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_infalgo.csv"
 
 type_values = {1: "I. Media", 2: "II. Pol", 3: "III. Other"}
 sub_values_1 = {1: "alt", 2: "msm"}
@@ -40,7 +40,7 @@ type_desc = {
     'other/com': 'III.4. other/com',
 }
 
-sample_idl_values = {"left": "1. left", "centre": "2. centre", "right": "3. right", "non partisan": "4. non partisan"}
+sample_idl_values = {"left": "1. Left", "centre": "2. Centre", "right": "3. Right", "non partisan": "4. Non-Par."}
 
 
 # Prep Human Coded Sample
@@ -89,8 +89,8 @@ df_sample = df_sample.dropna()
 accounts = df_sample['username']
 
 
-# Prep GPT Coded Data
-df = pd.read_csv(OUTPUT_FILE_PATH).drop(columns=['description'])
+# Prep M2 Data
+df = pd.read_csv(DATA_M2).drop(columns=['description'])
 vars = ['username', 'task_type', 'task_sub', 'task_ideology']
 df = df[vars]
 df.info()
@@ -131,12 +131,10 @@ pd.crosstab(df['type'],df['task_ideology'], margins=True)
 # Method 2 Broad categories
 pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
 
-
 # Method 2 Broad categories sample
 pd.crosstab(df_sample['ai_type'],df_sample['task_ideology'], margins=True).round(2)
 # Method 2 Broad categories sample
 pd.crosstab(df_sample['human_type'],df_sample['fg_idl'], margins=True)
-
 
 cohen_kappa_score(df_sample['fg_type'], df_sample['task_type'])
 cohen_kappa_score(df_sample['fg_sub'], df_sample['task_sub'])
@@ -151,7 +149,7 @@ test.mean()
 
 
 # Method 3: Analyasis of influencers based on ALGO Method (3)
-df_algo = pd.read_csv("data/tmp/output_gpt-4o_infalgo.csv")
+df_algo = pd.read_csv(DATA_M3)
 df_algo
 mask = df_algo['task_type'] == 1
 df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_1)
@@ -209,8 +207,9 @@ df_ai['method'] = 'M2 Sample IA'
 
 df_algo['username'] = df_algo['username'].str.lower()
 df_algo = df_algo.set_index('username')
-df_algo.columns =  ['description', 'type', 'idl', 'sub', 'mix']
-df_algo = df_algo[vars]
+df_algo.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
+
+df_algo = df_algo[vars].copy()
 df_algo['method'] = 'M3'
 df_algo
 
@@ -227,17 +226,17 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.yticks(fontsize=18)
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-make_fig(df_66, title='Method 1 | Expert Evaluation \nn=101', output='fig_m1.png')
+make_fig(df_66, title='Method 1 | Expert Evaluation \nn=101', output='figures/fig_m1.png')
 plot = pd.crosstab(df['type'], df['idl'])
-make_fig(plot, title='Method 2 | Hybrid Evaluation \nn=477', output='fig_m2.png')
+make_fig(plot, title='Method 2 | Hybrid Evaluation \nn=477', output='figures/fig_m2.png')
 plot = pd.crosstab(df_fg['type'], df_fg['idl'])
-make_fig(plot, title='M2 Human Sample \nn=48', output='fig_m2hm.png')
+make_fig(plot, title='M2 Human Sample \nn=48', output='figures/fig_m2hm.png')
 plot = pd.crosstab(df_ai['type'], df_ai['idl'])
 plot['3. Right'] = [0, 0, 0]
 plot = plot[["1. Left", "2. Centre", "3. Right", "4. Non-Par."]]
-make_fig(plot, title='M2 AI Sample \nn=48', output='fig_m2ai.png')
+make_fig(plot, title='M2 AI Sample \nn=48', output='figures/fig_m2ai.png')
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
-make_fig(plot, title='Method 3 | Algorithmic Evaluation \nn=40', output='fig_m3.png')
+make_fig(plot, title='Method 3 | Algorithmic Evaluation \nn=40', output='figures/fig_m3.png')
 
 
 def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
@@ -251,10 +250,15 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.yticks(fontsize=18)
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-plot = df_66/101
-make_fig(plot.round(2), title='Method 1 | Expert Evaluation \nn=101', output='fig_m1_prop.png')
-plot = pd.crosstab(df['type'], df['idl'])/477
-make_fig(plot.round(2), title='Method 2 | Hybrid Evaluation \nn=477', output='fig_m2_prop.png')
-plot = pd.crosstab(df_algo['type'], df_algo['idl'])/40
-make_fig(plot.round(2), title='Method 3 | Algorithmic Evaluation \nn=40', output='fig_m3_prop.png')
+n1 = df_66.sum().sum()
+plot = df_66/n1
+make_fig(plot.round(2), title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1_prop.png')
+plot = pd.crosstab(df['type'], df['idl'])
+n2 = plot.sum().sum()
+plot = plot/n2
+make_fig(plot.round(2), title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2_prop.png')
+plot = pd.crosstab(df_algo['type'], df_algo['idl'])
+n3 = plot.sum().sum()
+plot = plot/n3
+make_fig(plot.round(2), title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3_prop.png')
 
