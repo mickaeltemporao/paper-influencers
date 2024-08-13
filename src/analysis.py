@@ -92,29 +92,29 @@ accounts = df_sample['username']
 
 
 # Prep M2 Data
-df = pd.read_csv(DATA_M2).drop(columns=['description'])
+df2 = pd.read_csv(DATA_M2).drop(columns=['description'])
 vars = ['username', 'task_type', 'task_sub', 'task_ideology']
-df = df[vars]
-df.info()
+df2 = df2[vars]
+df2.info()
 
-mask = df['task_type'] == 1
-df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_1)
-mask = df['task_type'] == 2
-df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_2)
-mask = df['task_type'] == 3
-df.loc[mask, 'task_sub'] = df.loc[mask, 'task_sub'].replace(sub_values_3)
+mask = df2['task_type'] == 1
+df2.loc[mask, 'task_sub'] = df2.loc[mask, 'task_sub'].replace(sub_values_1)
+mask = df2['task_type'] == 2
+df2.loc[mask, 'task_sub'] = df2.loc[mask, 'task_sub'].replace(sub_values_2)
+mask = df2['task_type'] == 3
+df2.loc[mask, 'task_sub'] = df2.loc[mask, 'task_sub'].replace(sub_values_3)
 
-df['task_ideology'] = df['task_ideology'].replace(idl_values)
-df['task_type'] = df['task_type'].replace(type_values)
+df2['task_ideology'] = df2['task_ideology'].replace(idl_values)
+df2['task_type'] = df2['task_type'].replace(type_values)
 
-df['type'] = df['task_type'] + "/" + df['task_sub']
+df2['type'] = df2['task_type'] + "/" + df2['task_sub']
 
 
-df['username'] = df['username'].str.lower()
-df = df.set_index('username')
+df2['username'] = df2['username'].str.lower()
+df2 = df2.set_index('username')
 df_sample['username'] = df_sample['username'].str.lower()
 df_sample = df_sample.set_index('username')
-df_sample = df_sample.join(df)
+df_sample = df_sample.join(df2)
 df_sample['human_type'] = df_sample['fg_type'] + "/" + df_sample['fg_sub']
 df_sample['ai_type'] = df_sample['task_type'] + "/" + df_sample['task_sub']
 df_sample['ai_type'] = df_sample['ai_type'].replace(type_desc)
@@ -124,14 +124,14 @@ vars_fg = df_sample.columns[df_sample.columns.str.contains('fg')]
 vars_task = df_sample.columns[df_sample.columns.str.contains('task')]
 
 # Make table
-df['type'] = df['task_type'] + "/" + df['task_sub']
+df2['type'] = df2['task_type'] + "/" + df2['task_sub']
 
 # Method 2 Table
-df['type'] = df['type'].replace(type_desc)
-pd.crosstab(df['type'],df['task_ideology'], margins=True)
+df2['type'] = df2['type'].replace(type_desc)
+pd.crosstab(df2['type'],df2['task_ideology'], margins=True)
 
 # Method 2 Broad categories
-pd.crosstab(df['task_type'],df['task_ideology'], margins=True).round(2)
+pd.crosstab(df2['task_type'],df2['task_ideology'], margins=True).round(2)
 
 # Method 2 Broad categories sample
 pd.crosstab(df_sample['ai_type'],df_sample['task_ideology'], margins=True).round(2)
@@ -195,25 +195,26 @@ df4.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'bac
 
 # Get proportion of accounts in list of 66 & 477
 usr66 = pd.read_table('data/raw/acc_tw_66.txt')['username'].str.lower()
+usr66
 pd.Series(df_algo['username'].str.lower().unique()).isin(usr66).sum()
-pd.Series(df_algo['username'].str.lower().unique()).isin(df.index.str.lower()).sum()
+pd.Series(df_algo['username'].str.lower().unique()).isin(df2.index.str.lower()).sum()
 
 
 # Prepare Figures
 
 # Creating the dataframe
-df_66 = pd.DataFrame({
+df1 = pd.DataFrame({
     'task_ideology': ['1. Left', '2. Centre', '3. Right', '4. Non-Par.'],
     'I. Media': [7, 0, 3, 4],
     'II. Pol': [9, 13, 13, 0],
     'III. Other': [13, 3, 28, 8],
 })
-df_66 = pd.DataFrame(df_66).set_index('task_ideology').T
-df_66
+df1 = pd.DataFrame(df1).set_index('task_ideology').T
+df1
 
 vars = ['type', 'sub', 'idl', 'mix']
-df.columns = vars
-df['method'] = 'M1'
+df2.columns = vars
+df2['method'] = 'M2'
 
 df_fg = df_sample[df_sample.columns[df_sample.columns.str.contains('fg|human')]]
 df_fg
@@ -249,9 +250,9 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
 
-n1 = df_66.sum().sum()
-make_fig(df_66, title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1.png')
-plot = pd.crosstab(df['type'], df['idl'])
+n1 = df1.sum().sum()
+make_fig(df1, title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1.png')
+plot = pd.crosstab(df2['type'], df2['idl'])
 n2 = plot.sum().sum()
 make_fig(plot, title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2.png')
 plot = pd.crosstab(df_fg['type'], df_fg['idl'])
@@ -282,9 +283,9 @@ def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
     plt.yticks(fontsize=18)
     plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-plot = df_66/n1
+plot = df1/n1
 make_fig(plot.round(2), title=f'Method 1 | Expert Evaluation \nn={n1}', output='figures/fig_m1_prop.png')
-plot = pd.crosstab(df['type'], df['idl'])
+plot = pd.crosstab(df2['type'], df2['idl'])
 plot = plot/n2
 make_fig(plot.round(2), title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2_prop.png')
 plot = pd.crosstab(df_algo['type'], df_algo['idl'])
