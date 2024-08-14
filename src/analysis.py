@@ -151,28 +151,28 @@ test.mean()
 
 
 # Method 3: Analyasis of influencers based on ALGO Method (3)
-df_algo = pd.read_csv(DATA_M3)
-df_algo
-mask = df_algo['task_type'] == 1
-df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_1)
-mask = df_algo['task_type'] == 2
-df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_2)
-mask = df_algo['task_type'] == 3
-df_algo.loc[mask, 'task_sub'] = df_algo.loc[mask, 'task_sub'].replace(sub_values_3)
+df3 = pd.read_csv(DATA_M3)
+df3
+mask = df3['task_type'] == 1
+df3.loc[mask, 'task_sub'] = df3.loc[mask, 'task_sub'].replace(sub_values_1)
+mask = df3['task_type'] == 2
+df3.loc[mask, 'task_sub'] = df3.loc[mask, 'task_sub'].replace(sub_values_2)
+mask = df3['task_type'] == 3
+df3.loc[mask, 'task_sub'] = df3.loc[mask, 'task_sub'].replace(sub_values_3)
 
-df_algo['task_ideology'] = df_algo['task_ideology'].replace(idl_values)
-df_algo['task_type'] = df_algo['task_type'].replace(type_values)
-df_algo
+df3['task_ideology'] = df3['task_ideology'].replace(idl_values)
+df3['task_type'] = df3['task_type'].replace(type_values)
+df3
 
-df_algo[types].groupby('task_type').value_counts().sort_index()
-df_algo[types].groupby('task_type').value_counts(normalize=True).sort_index()
-df_algo['task_ideology'].value_counts().sort_index()
-df_algo['task_ideology'].value_counts(normalize=True).sort_index()
+df3[types].groupby('task_type').value_counts().sort_index()
+df3[types].groupby('task_type').value_counts(normalize=True).sort_index()
+df3['task_ideology'].value_counts().sort_index()
+df3['task_ideology'].value_counts(normalize=True).sort_index()
 
-df_algo['type'] = df_algo['task_type'] + "/" + df_algo['task_sub']
-df_algo['type'] = df_algo['type'].replace(type_desc)
+df3['type'] = df3['task_type'] + "/" + df3['task_sub']
+df3['type'] = df3['type'].replace(type_desc)
 
-pd.crosstab(df_algo['type'], df_algo['task_ideology'], margins=True)
+pd.crosstab(df3['type'], df3['task_ideology'], margins=True)
 
 # Method 4 - Network
 DATA_M4 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_networkalgo_m4.csv"
@@ -191,14 +191,17 @@ df4['type'] = df4['type'].replace(type_desc)
 
 pd.crosstab(df4['type'], df4['task_ideology'], margins=True)
 
-df4.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
+df4.columns =  ['username', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
 
 # Get proportion of accounts in list of 66 & 477
 usr66 = pd.read_table('data/raw/acc_tw_66.txt')['username'].str.lower()
 usr66
-pd.Series(df_algo['username'].str.lower().unique()).isin(usr66).sum()
-pd.Series(df_algo['username'].str.lower().unique()).isin(df2.index.str.lower()).sum()
+usr66
 
+pd.Series(df3['username'].str.lower().unique()).isin(usr66).sum()
+pd.Series(df3['username'].str.lower().unique()).isin(df2.index.str.lower()).sum()
+pd.Series(df3['username'].str.lower().unique()).isin(df4['username'].str.lower().unique()).sum()
+pd.Series(df4['username'].str.lower().unique()).isin(df2.index.str.lower()).sum()
 
 # Prepare Figures
 
@@ -228,15 +231,11 @@ df_ai.columns = vars
 df_ai
 df_ai['method'] = 'M2 Sample IA'
 
-df_algo['username'] = df_algo['username'].str.lower()
-df_algo = df_algo.set_index('username')
-df_algo.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
-
-df_algo = df_algo[vars].copy()
-df_algo['method'] = 'M3'
-df_algo
-
-pd.crosstab(df_algo['type'], df_algo['idl'])
+df3['username'] = df3['username'].str.lower()
+df3 = df3.set_index('username')
+df3.columns =  ['description', 'type', 'idl', 'age', 'gender', 'education', 'background', 'sub', 'mix']
+df3['method'] = 'M3'
+pd.crosstab(df3['type'], df3['idl'])
 
 def make_fig(df, title='Method 1 (n=101)', output='heatmap_square.png'):
 # Plotting the heatmap
@@ -262,7 +261,7 @@ plot = pd.crosstab(df_ai['type'], df_ai['idl'])
 plot['3. Right'] = [0, 0, 0]
 plot = plot[["1. Left", "2. Centre", "3. Right", "4. Non-Par."]]
 make_fig(plot, title=f'M2 AI Sample \nn={nsample}', output='figures/fig_m2ai.png')
-plot = pd.crosstab(df_algo['type'], df_algo['idl'])
+plot = pd.crosstab(df3['type'], df3['idl'])
 n3 = plot.sum().sum()
 make_fig(plot, title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3.png')
 plot = pd.crosstab(df4['type'], df4['idl'])
@@ -288,7 +287,7 @@ make_fig(plot.round(2), title=f'Method 1 | Expert Evaluation \nn={n1}', output='
 plot = pd.crosstab(df2['type'], df2['idl'])
 plot = plot/n2
 make_fig(plot.round(2), title=f'Method 2 | Hybrid Evaluation \nn={n2}', output='figures/fig_m2_prop.png')
-plot = pd.crosstab(df_algo['type'], df_algo['idl'])
+plot = pd.crosstab(df3['type'], df3['idl'])
 plot = plot/n3
 make_fig(plot.round(2), title=f'Method 3 | Algorithmic Evaluation \nn={n3}', output='figures/fig_m3_prop.png')
 plot = pd.crosstab(df4['type'], df4['idl'])

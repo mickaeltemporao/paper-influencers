@@ -1,5 +1,5 @@
 """
-This module interacts with chatGPT API to create labels based on a given task.
+This module interacts with chatGPT API to create labels for the given tasks.
 """
 
 import src.tasks
@@ -17,12 +17,13 @@ load_dotenv(find_dotenv())
 DATA_PATH = os.environ.get("DATA_PATH")
 USER_FILE = os.environ.get("USER_FILE")
 # USER_FILE = 'tmp/inf-algo-ids.csv'
-USER_FILE = 'tmp/m4-ids.csv'
-# MODEL = "gpt-4o"
-MODEL = "gpt-4o-mini-2024-07-18"
-# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}.csv"
-# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_infalgo.csv"
-OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_networkalgo_m4.csv"
+# USER_FILE = 'tmp/m1-ids.csv'
+# USER_FILE = 'tmp/m4-ids.csv'
+MODEL = "gpt-4o"
+# MODEL = "gpt-4o-mini-2024-07-18"
+# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_expert_m1.csv"
+OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_infalgo.csv"
+# OUTPUT_FILE_PATH = DATA_PATH + f"tmp/output_{MODEL}_networkalgo_m4.csv"
 SUBTASK_LIST = list(src.tasks.task_sub.keys())
 
 
@@ -82,6 +83,7 @@ def main():
     tmp_df = find_file()
 
     for task in src.tasks.task_main:
+        print(f"Starting {task}")
         newcol = f'task_{task}'
 
         if newcol not in tmp_df.columns:
