@@ -1,4 +1,3 @@
-import networkx as nx  # TODO: REMOVE NETWORKX
 import pandas as pd
 import igraph as ig
 from matplotlib import pyplot as plt
