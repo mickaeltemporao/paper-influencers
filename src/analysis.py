@@ -28,6 +28,7 @@ DATA_M3 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_infalgo.csv"
 DATA_M4 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_networkalgo.csv"
 
 def main():
+
     sd_vars = ['type', 'idl', 'age', 'gender', 'education', 'background', 'method']
     type_values = {1: "media", 2: "pol", 3: "other"}
     sub_values_1 = {1: "alt", 2: "msm"}
@@ -220,8 +221,39 @@ def main():
         else:
             return pd.Series(series_or_index).str.lower().str.strip().unique()
 
+    def create_overlap_matrix(username_sets):
+        """Create a matrix showing overlaps between all sets"""
+        sets_names = list(username_sets.keys())
+        overlap_matrix = pd.DataFrame(index=sets_names, columns=sets_names)
+        for row_name in sets_names:
+            for col_name in sets_names:
+                if row_name == col_name:
+                    # Diagonal: total unique usernames in that set
+                    overlap_matrix.loc[row_name, col_name] = len(username_sets[row_name])
+                else:
+                    # Off-diagonal: overlap count
+                    overlap = username_sets[row_name] & username_sets[col_name]
+                    overlap_matrix.loc[row_name, col_name] = len(overlap)
+        return overlap_matrix
+
+
+    # Prepare Figures
+
+    # Creating the dataframe
+    # WARNING 1: some accounts in M1 don't have Twitter account, we drop them
+    # WARNING 2: There were 2 usernames on a single line on FG's file: @levraimcfly @Raphael_Carlier
+    #            They where both coded with the same IDL and TYPE
+    df1 = pd.read_csv("data/raw/fropis-m1.csv")
+    df1['idl'] = df1['idl'].replace(idl_values)
+    df1['type'] = df1['type'].replace(labels_for_type)
+    pd.crosstab(df1['idl'], df1['type'])
+    pd.crosstab(df1['idl'], df1['type']).sum(axis=1)
+    pd.crosstab(df1['idl'], df1['type'], margins=True)
+    test = pd.crosstab(df1['idl'], df1['type'], margins=True, normalize="index")
+    test.round(2)
+
     # Clean all username series
-    usernames_1 = clean_usernames(usr66)  # your reference series
+    usernames_1 = clean_usernames(df1['username'])  # your reference series
     usernames_2 = clean_usernames(df2.index)
     usernames_3 = clean_usernames(df3['username'])
     usernames_4 = clean_usernames(df4['username'])
@@ -234,39 +266,9 @@ def main():
         'Set4': set(usernames_4),
     }
 
-    def create_overlap_matrix(username_sets):
-        """Create a matrix showing overlaps between all sets"""
-        sets_names = list(username_sets.keys())
-        overlap_matrix = pd.DataFrame(index=sets_names, columns=sets_names)
-        
-        for row_name in sets_names:
-            for col_name in sets_names:
-                if row_name == col_name:
-                    # Diagonal: total unique usernames in that set
-                    overlap_matrix.loc[row_name, col_name] = len(username_sets[row_name])
-                else:
-                    # Off-diagonal: overlap count
-                    overlap = username_sets[row_name] & username_sets[col_name]
-                    overlap_matrix.loc[row_name, col_name] = len(overlap)
-        
-        return overlap_matrix
-
     # Create the matrix
     overlap_matrix = create_overlap_matrix(username_sets)
     print(overlap_matrix)
-
-    # Prepare Figures
-
-    # Creating the dataframe
-    df1 = pd.DataFrame({
-        'task_ideology': ['1. Left', '2. Centre', '3. Right', '4. Non-Par.'],
-        'I. Media': [7, 0, 3, 4],
-        'II. Pol': [9, 13, 13, 0],
-        'III. Other': [13, 3, 28, 8],
-    })
-    df1 = pd.DataFrame(df1).set_index('task_ideology').T
-    df1.sum(axis=1)
-
 
     df2.columns = ['type', 'idl', 'sub', 'age', 'gender', 'education', 'background', 'mix']
     df2['method'] = 'M2'
@@ -341,7 +343,7 @@ def main():
     make_bar_fig(df, 'method', "Method", "2b")
 
     # Addin Non partisans back in
-    df = pd.concat([df1sim, df2[sd_vars], df3[sd_vars], df4[sd_vars]]).reset_index(drop=True)
+    df = pd.concat([df1, df2[sd_vars], df3[sd_vars], df4[sd_vars]]).reset_index(drop=True)
     df = df.replace(0, np.nan)
     df['background'] = df['background'].str[0]
     df['background'] = pd.to_numeric(df['background'])
@@ -376,8 +378,9 @@ def main():
         plt.yticks(fontsize=18)
         plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-    n1 = df1.sum().sum()
-    make_fig(df1, title=f'Method 1 | Expert Identification \nn={n1}', output='figures/fig_m1.png')
+    plot = pd.crosstab(df1['type'], df1['idl'])
+    n1 = plot.sum().sum()
+    make_fig(plot, title=f'Method 1 | Expert Identification \nn={n1}', output='figures/fig_m1.png')
     plot = pd.crosstab(df2['type'], df2['idl'])
     n2 = plot.sum().sum()
     make_fig(plot, title=f'Method 2 | Hybrid Identification \nn={n2}', output='figures/fig_m2.png')
@@ -407,7 +410,8 @@ def main():
         plt.yticks(fontsize=18)
         plt.savefig(output, bbox_inches='tight', pad_inches=0.1)
 
-    plot = df1/n1
+    plot = pd.crosstab(df1['type'], df1['idl'])
+    plot = plot/n2
     make_fig(plot.round(2), title=f'Method 1 | Expert Identification \nn={n1}', output='figures/fig_m1_prop.png')
     plot = pd.crosstab(df2['type'], df2['idl'])
     plot = plot/n2
