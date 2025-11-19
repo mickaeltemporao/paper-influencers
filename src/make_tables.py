@@ -29,6 +29,17 @@ combined_table = freq_table.astype(str) + ' (' + (pct_table * 100).astype(int).a
 print(combined_table)
 combined_table.to_clipboard(excel=True)
 
-def overlap_table():
-    return None
+# Total N of each type of Fropi identified across all methods, with duplicates excluded
+for i in df['type'].unique():
+    mask = df['type'] == i
+    n = len(df.loc[mask, 'username'].unique())
+    ntot = 1369
+    print(i, n, round(n/ntot, 2))
 
+for i in df['idl'].unique():
+    for j in df['method'].unique():
+
+groups = ['idl', 'method', 'type']
+
+df.groupby(groups)['username'].count()
+df.groupby(['method', 'type'])['username'].count()
