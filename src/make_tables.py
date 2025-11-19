@@ -36,9 +36,6 @@ for i in df['type'].unique():
     ntot = 1369
     print(i, n, round(n/ntot, 2))
 
-for i in df['idl'].unique():
-    for j in df['method'].unique():
-
 groups = ['idl', 'method', 'type']
 
 df.groupby(groups)['username'].count()
