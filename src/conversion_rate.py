@@ -12,7 +12,7 @@ dtypes = {
 }
 
 HOURS = 48
-QUANTILE = 95
+QUANTILE = 99.5
 
 # df = pd.read_csv("data/tmp/tweets-small-kfactor.csv", dtype=dtypes)
 users = pd.read_csv("data/tmp/twitter-users.csv")
@@ -26,9 +26,9 @@ df['date'] = df['created_at'].dt.date
 
 # Find Top 5% active accounts in the last 4 weeks 
 group = ['date', 'author_id']
-two_weeks = pd.to_datetime("2022-04-24") - pd.Timedelta('4w')
+week_filter = pd.to_datetime("2022-04-24") - pd.Timedelta('4w')
 top_df = df.groupby(group).size().reset_index(name='msg_count')
-mask = pd.to_datetime(top_df['date']) > two_weeks
+mask = pd.to_datetime(top_df['date']) > week_filter
 top_df = top_df[mask]
 top_df = top_df.set_index(group)
 tmp_df = top_df.reset_index().groupby('author_id').size()

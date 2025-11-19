@@ -35,7 +35,6 @@ def main():
     sub_values_2 = {1: "current", 2: "party", 3: "nat", 4: "int", 5: "gov"}
     sub_values_3 = {1: "pol", 2: "socpol", 3: "soc", 4: "com"}
     idl_values = {1: "1. Left", 2: "2. Centre", 3: "3. Right", 4: "4. Non-Par."}
-    types = ['task_type', 'task_sub']
     type_desc = {
         'media/msm': 'I.1. media/msm',
         'media/alt': 'I.2. media/alt',
@@ -188,6 +187,7 @@ def main():
     # Method 4 - Network
     DATA_M4 = DATA_PATH + "tmp/output_gpt-4o-mini-2024-07-18_networkalgo_m4.csv"
     df4 = pd.read_csv(DATA_M4).drop(columns=['description'])
+    df4
     mask = df4['task_type'] == 1
     df4.loc[mask, 'task_sub'] = df4.loc[mask, 'task_sub'].replace(sub_values_1)
     mask = df4['task_type'] == 2
@@ -343,7 +343,14 @@ def main():
     make_bar_fig(df, 'method', "Method", "2b")
 
     # Addin Non partisans back in
-    df = pd.concat([df1, df2[sd_vars], df3[sd_vars], df4[sd_vars]]).reset_index(drop=True)
+    df = pd.concat(
+        [
+            df1, 
+            df2.reset_index()[['username'] + sd_vars], 
+            df3.reset_index()[['username'] + sd_vars], 
+            df4.reset_index()[['username'] + sd_vars],
+        ]
+    ).reset_index(drop=True)
     df = df.replace(0, np.nan)
     df['background'] = df['background'].str[0]
     df['background'] = pd.to_numeric(df['background'])
@@ -422,5 +429,8 @@ def main():
     plot = pd.crosstab(df4['type'], df4['idl'])
     plot = plot/n4
     make_fig(plot.round(2), title=f'Method 4 | Centrality - Indegree \nn={n4}', output='figures/fig_m4_prop.png')
+
+
+
     return df
 
